@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store/main.dart';
 import 'package:store/order/handoff.dart';
 
 class OrderChecklistPage extends StatefulWidget {
@@ -11,15 +12,22 @@ class OrderChecklistPage extends StatefulWidget {
 class _OrderChecklistPageState extends State<OrderChecklistPage> {
   // Sample data for the list
   final List<Map<String, dynamic>> products = List.generate(
-      10,
-      (index) => {
-            'name': 'Product ${index + 1}',
-            'aisle': 'Aisle ${index + 1}',
-            'quantity': 0,
-          });
+    5,
+    (index) => {
+      'name': 'Product ${index + 1}',
+      'aisle': 'Aisle ${index + 1}',
+      'checked': false, // Added 'checked' status
+    },
+  );
+
+  bool areAllItemsChecked() {
+    return products.every((product) => product['checked']);
+  }
 
   @override
   Widget build(BuildContext context) {
+    bool allItemsChecked = areAllItemsChecked();
+
     return Scaffold(
       appBar: AppBar(
         title: const Hero(
@@ -40,10 +48,10 @@ class _OrderChecklistPageState extends State<OrderChecklistPage> {
       body: Column(
         children: [
           Expanded(
-            // Wrap ListView.builder in Expanded
             child: ListView.builder(
               itemCount: products.length,
               itemBuilder: (context, index) {
+                var product = products[index];
                 return Container(
                   margin:
                       const EdgeInsets.only(left: 1.0, right: 1.0, bottom: 5.0),
@@ -51,61 +59,116 @@ class _OrderChecklistPageState extends State<OrderChecklistPage> {
                     border: Border.all(
                         color: Theme.of(context).colorScheme.secondary),
                     borderRadius: BorderRadius.circular(2.0),
+                    color: product['checked']
+                        ? Colors.lightGreenAccent
+                        : Colors
+                            .white, // Change color based on 'checked' status
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 4),
-                    title: Text(products[index]['name']),
-                    leading: Text(products[index]['aisle']),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove),
-                          onPressed: () {
-                            setState(() {
-                              if (products[index]['quantity'] > 0) {
-                                products[index]['quantity']--;
-                              }
-                            });
-                          },
-                        ),
-                        Text('${products[index]['quantity']}'),
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () {
-                            setState(() {
-                              products[index]['quantity']++;
-                            });
-                          },
-                        ),
-                      ],
+                    title: Text(product['name']),
+                    leading: Text(product['aisle']),
+                    trailing: IconButton(
+                      icon: Icon(
+                        product['checked']
+                            ? Icons.remove_circle_outline
+                            : Icons
+                                .check_circle_outline, // Change icon based on 'checked' status
+                        size: 30.0,
+                        color: product['checked']
+                            ? Colors.deepOrangeAccent
+                            : null, // Change icon color for 'checked' items
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          product['checked'] =
+                              !product['checked']; // Toggle 'checked' status
+                        });
+                      },
                     ),
                   ),
                 );
               },
             ),
           ),
-          Hero(
-            tag: 'handoffbutton',
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HandOffPage()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * 0.1,
-                    vertical: 15),
+          Row(
+            // Use Row to split the button into two parts
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                  color: Colors.white,
+                  child: ElevatedButton(
+                    onPressed: areAllItemsChecked()
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const MyHomePage(title: 'Otto Store')),
+                            );
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple, // Left side color
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5), // Square shape
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20,
+                      ),
+                    ),
+                    child: const Text('Pack Order', // Left side text
+                        style: TextStyle(color: Colors.white, fontSize: 22)),
+                  ),
+                ),
               ),
-              child: const Text('Complete Checklist',
-                  style: TextStyle(color: Colors.white, fontSize: 20)),
-            ),
+              Expanded(
+                child: Hero(
+                  tag: 'handoffbutton',
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                    color: Colors.white,
+                    child: ElevatedButton(
+                      onPressed: allItemsChecked
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const HandOffPage()),
+                              );
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightGreenAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          side: BorderSide(
+                            color: allItemsChecked
+                                ? Colors.black26
+                                : Colors.white, // Conditional border color
+                            width: 2.0,
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                      ),
+                      child: Text(
+                        'Hand Off',
+                        style: TextStyle(
+                          color: allItemsChecked
+                              ? Colors.black
+                              : Colors.white, // Conditional text color
+                          fontSize: 22,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
