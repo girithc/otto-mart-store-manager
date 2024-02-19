@@ -6,6 +6,7 @@ import 'package:store/quick-add/listen-barcode.dart';
 import 'package:store/shelf/shelf.dart';
 import 'package:store/store/stores.dart';
 import 'package:store/utils/scanner.dart';
+import 'package:store/vendor/vendor_home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -79,12 +80,14 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: const Text(
           "Otto Store",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 25),
         ),
+        leading: Container(), // Explicitly set leading to an empty Container
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            /*
             Align(
               alignment: Alignment.topCenter,
               child: GestureDetector(
@@ -149,13 +152,44 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: scanBarcode,
-              child: const Text('Barcode Scanner'),
-            ),
-            ElevatedButton(
-              onPressed: scanQR,
-              child: const Text('QR Code Scanner'),
+            */
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const VendorHomeScreen()),
+                )
+              },
+              child: Center(
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.1,
+                  width: MediaQuery.of(context).size.width * 0.85,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15), // Rounded borders
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.25), // Shadow color
+                        spreadRadius: 0,
+                        blurRadius: 20, // Increased shadow blur
+                        offset:
+                            const Offset(0, 10), // Increased vertical offset
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Vendor',
+                      style: TextStyle(
+                          fontSize: 25,
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal),
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 10),
             GestureDetector(

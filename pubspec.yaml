@@ -46,6 +46,7 @@ dependencies:
   flutter_barcode_listener: ^0.1.4
   google_fonts: ^6.1.0
   carousel_slider: ^4.2.1
+  flutter_form_builder: ^9.2.1
 
 dev_dependencies:
   flutter_test:
