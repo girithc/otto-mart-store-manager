@@ -146,8 +146,12 @@ class _VendorListScreenState extends State<VendorListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddVendorForm,
+        backgroundColor: Colors.deepPurpleAccent,
         tooltip: 'Add Vendor',
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.person_add_sharp,
+          color: Colors.white,
+        ),
       ),
     );
   }
