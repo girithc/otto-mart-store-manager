@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:store/utils/constants.dart';
+import 'package:store/utils/network/service.dart';
+import 'package:http/http.dart' as http;
 
 class VendorListScreen extends StatefulWidget {
   const VendorListScreen({super.key});
@@ -18,6 +21,29 @@ class _VendorListScreenState extends State<VendorListScreen> {
       return 'This field is required.';
     }
     return null;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getVendorList();
+  }
+
+  Future<void> getVendorList() async {
+    // Fetch the list of vendors from the server
+    final networkService = NetworkService();
+    Map<String, dynamic> data = {};
+
+    //final response = await networkService.postWithAuth('/vendor-list', additionalData: data);
+
+    final response = await http.get(Uri.parse('$baseUrl/vendor-list'));
+    if (response.statusCode == 200) {
+      // Handle the response
+      print("Response: ${response.body} ");
+    } else {
+      // Handle the error
+    }
   }
 
   void _showAddVendorForm() {
@@ -40,21 +66,45 @@ class _VendorListScreenState extends State<VendorListScreen> {
                 children: [
                   FormBuilderTextField(
                     name: 'name',
-                    decoration: _inputDecoration('Name'),
+                    decoration: InputDecoration(
+                      labelText: 'Name',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                     validator: _requiredValidator,
                   ),
                   const SizedBox(height: 25),
                   FormBuilderTextField(
                     name: 'brand',
-                    decoration: _inputDecoration('Brand'),
+                    decoration: InputDecoration(
+                      labelText: 'Brand',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                     validator: _requiredValidator,
                   ),
                   const SizedBox(height: 25),
                   FormBuilderDropdown(
                     name: 'delivery_frequency',
-                    decoration: _inputDecoration('Delivery Frequency'),
+                    decoration: InputDecoration(
+                      labelText: 'Delivery Frequency',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                     validator: _requiredValidator,
-                    items: ['Daily', 'Weekly', 'Monthly']
+                    items: ['Once', 'Twice', 'Thrice', 'All Days']
                         .map((frequency) => DropdownMenuItem(
                             value: frequency, child: Text(frequency)))
                         .toList(),
@@ -62,7 +112,15 @@ class _VendorListScreenState extends State<VendorListScreen> {
                   const SizedBox(height: 25),
                   FormBuilderDropdown(
                     name: 'delivery_day',
-                    decoration: _inputDecoration('Delivery Day'),
+                    decoration: InputDecoration(
+                      labelText: 'Delivery Day',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                     validator: _requiredValidator,
                     items: [
                       'Monday',
@@ -80,13 +138,29 @@ class _VendorListScreenState extends State<VendorListScreen> {
                   const SizedBox(height: 25),
                   FormBuilderTextField(
                     name: 'mode_of_communication',
-                    decoration: _inputDecoration('Mode of Communication'),
+                    decoration: InputDecoration(
+                      labelText: 'Mode Of Communication',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                     validator: _requiredValidator,
                   ),
                   const SizedBox(height: 25),
                   FormBuilderTextField(
                     name: 'notes',
-                    decoration: _inputDecoration('Notes'),
+                    decoration: InputDecoration(
+                      labelText: 'Notes',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 25),
                   ElevatedButton(
@@ -121,18 +195,18 @@ class _VendorListScreenState extends State<VendorListScreen> {
         );
       },
     );
-  }
 
-  InputDecoration _inputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      filled: true,
-      fillColor: Colors.grey[200],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: BorderSide.none,
-      ),
-    );
+    InputDecoration inputDecoration(String label) {
+      return InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.grey[200],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          borderSide: BorderSide.none,
+        ),
+      );
+    }
   }
 
   @override
