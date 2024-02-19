@@ -106,8 +106,7 @@ class _OrderChecklistPageState extends State<OrderChecklistPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      const MyHomePage(title: 'Otto Store')),
+                                  builder: (context) => const MyHomePage()),
                             );
                           }
                         : null,

@@ -65,10 +65,7 @@ class _HandOffPageState extends State<HandOffPage> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const MyHomePage(
-                        title: 'Otto Store',
-                      )),
+              MaterialPageRoute(builder: (context) => const MyHomePage()),
             );
           },
           child: Container(
@@ -272,8 +269,7 @@ class _HandOffPageState extends State<HandOffPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const MyHomePage(
-                                          title: 'Otto Store')),
+                                      builder: (context) => const MyHomePage()),
                                 );
                               }
                             : null, // Button is disabled if isPinCorrect is false

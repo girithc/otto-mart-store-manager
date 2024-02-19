@@ -37,6 +37,15 @@ dependencies:
   pinput: ^3.0.1
   flutter_barcode_scanner: ^2.0.0
   image_picker: ^1.0.4
+  connectivity_plus: ^5.0.2
+  flutter_secure_storage: ^9.0.0
+  upgrader: ^9.0.0
+  firebase_messaging: ^14.7.15
+  provider: ^6.1.1
+  webview_flutter: ^4.5.0
+  flutter_barcode_listener: ^0.1.4
+  google_fonts: ^6.1.0
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:
