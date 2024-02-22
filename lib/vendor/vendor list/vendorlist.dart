@@ -338,9 +338,43 @@ class _VendorListScreenState extends State<VendorListScreen> {
           );
           getVendorList();
         } else {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Error"),
+                content: Text(response.body),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text("Close"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
           print('Failed to add vendor: ${response.body}');
         }
       } catch (e) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Error"),
+              content: Text(e.toString()),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text("Close"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
         print('Error submitting form: $e');
       }
     }
@@ -443,6 +477,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
   InputDecoration inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
+      labelStyle: const TextStyle(color: Colors.deepPurpleAccent),
       filled: true,
       fillColor: Colors.grey[200],
       border: OutlineInputBorder(
@@ -652,6 +687,14 @@ class _VendorListScreenState extends State<VendorListScreen> {
                                 name: 'notes',
                                 decoration: inputDecoration('Notes'),
                                 initialValue: vendor.notes,
+                                maxLines: 20,
+                                minLines: 1,
+                                textInputAction: TextInputAction.newline,
+                                // Make the field expand horizontally to fill the available space
+                                expands:
+                                    false, // Allow the field to expand vertically
+                                keyboardType: TextInputType
+                                    .multiline, // Allow multiline input
                               ),
                             ],
                           ),
@@ -681,123 +724,430 @@ class _VendorListScreenState extends State<VendorListScreen> {
                 );
                 return false; // Return false to prevent the item from being dismissed
               },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                padding: const EdgeInsets.all(
-                    10), // Add padding inside the container for its children
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10), // Rounded corners
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5), // Shadow color
-                      spreadRadius: 1, // Spread radius
-                      blurRadius: 7, // Blur radius
-                      offset: const Offset(0, 3), // Changes position of shadow
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(vendor.name,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8), // Space between title and chips
-
-                    // Brands chips
-                    Wrap(
-                      spacing: 6, // Space between chips
-                      children: vendor.brands
-                          .map((brand) => Chip(
-                                label: Text(
-                                  brand,
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                backgroundColor: const Color.fromARGB(
-                                    255,
-                                    11,
-                                    105,
-                                    236), // Chip background color for brands
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: const BorderSide(
-                                      color: Colors
-                                          .transparent), // Transparent border
-                                ),
-                              ))
-                          .toList(),
-                    ),
-
-                    const SizedBox(
-                        height: 5), // Space between different sets of chips
-
-                    // Phone and Mode of Communication chips
-                    Wrap(
-                      spacing: 6, // Space between chips horizontally
-                      runSpacing:
-                          6, // Space between chips vertically, creating a new "line"
-                      children: [
-                        Chip(
-                          label: Text(vendor.phone),
-                          backgroundColor: Colors
-                              .greenAccent, // Different background color for phone
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(
-                                color:
-                                    Colors.transparent), // Transparent border
-                          ),
+              child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          side: const BorderSide(
+                              color: Colors.black,
+                              width: 2), // Black border with 2px width
                         ),
-                        ...vendor.modeOfCommunication
-                            .map((mode) => Chip(
-                                  label: Text(mode),
-                                  backgroundColor: Colors
-                                      .greenAccent, // Background color for contact modes
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    side: const BorderSide(
+                        backgroundColor: Colors.white,
+                        surfaceTintColor: Colors.white,
+                        title: const Text('View Vendor'),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment
+                                .start, // Align content to the start
+                            children: [
+                              InputDecorator(
+                                decoration: inputDecoration('Name'),
+                                child: Text(vendor.name,
+                                    style:
+                                        const TextStyle(color: Colors.black)),
+                              ),
+                              const SizedBox(height: 25),
+                              InputDecorator(
+                                decoration: inputDecoration('Brands'),
+                                child: Text(vendor.brands.join(", "),
+                                    style: const TextStyle(
                                         color: Colors
-                                            .transparent), // Transparent border
-                                  ),
-                                ))
-                            .toList(),
-                      ],
-                    ),
-
-                    const SizedBox(
-                        height: 5), // Space between different sets of chips
-
-                    // Frequency and Delivery Day chips
-                    Wrap(
-                      spacing: 6, // Space between chips
-                      children: [
-                        Chip(
-                          label: Text(
-                            vendor.deliveryFrequency,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          backgroundColor: const Color.fromARGB(255, 11, 105,
-                              236), // Background color for frequency
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(
-                                color:
-                                    Colors.transparent), // Transparent border
+                                            .black)), // Assuming 'brands' is a list
+                              ),
+                              const SizedBox(height: 25),
+                              InputDecorator(
+                                decoration:
+                                    inputDecoration('Delivery Frequency'),
+                                child: Text(vendor.deliveryFrequency,
+                                    style:
+                                        const TextStyle(color: Colors.black)),
+                              ),
+                              const SizedBox(height: 25),
+                              InputDecorator(
+                                decoration: inputDecoration('Delivery Days'),
+                                child: Text(vendor.deliveryDay.join(", "),
+                                    style: const TextStyle(
+                                        color: Colors
+                                            .black)), // Assuming 'deliveryDay' is a list
+                              ),
+                              const SizedBox(height: 25),
+                              InputDecorator(
+                                decoration:
+                                    inputDecoration('Mode Of Communication'),
+                                child: Text(
+                                    vendor.modeOfCommunication.join(", "),
+                                    style: const TextStyle(
+                                        color: Colors
+                                            .black)), // Assuming 'modeOfCommunication' is a list
+                              ),
+                              const SizedBox(height: 25),
+                              InputDecorator(
+                                decoration: inputDecoration('Phone'),
+                                child: Text(vendor.phone,
+                                    style:
+                                        const TextStyle(color: Colors.black)),
+                              ),
+                              const SizedBox(height: 25),
+                              InputDecorator(
+                                decoration: inputDecoration('Email'),
+                                child: Text(vendor.email,
+                                    style:
+                                        const TextStyle(color: Colors.black)),
+                              ),
+                              const SizedBox(height: 25),
+                              InputDecorator(
+                                decoration: inputDecoration('Notes'),
+                                child: Text(vendor.notes,
+                                    style:
+                                        const TextStyle(color: Colors.black)),
+                              ),
+                            ],
                           ),
                         ),
-                        ...vendor.deliveryDay
-                            .map((day) => Chip(
-                                  label: Text(day),
+                        actions: <Widget>[
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              setState(() {
+                                // Initialize state variables with the existing vendor's values
+                                _selectedBrands = vendor.brands;
+                                _selectedDeliveryDays = vendor.deliveryDay;
+                                _selectMOC = vendor.modeOfCommunication;
+                              });
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      side: const BorderSide(
+                                          color: Colors.black,
+                                          width:
+                                              2), // Black border with 2px width
+                                    ),
+                                    backgroundColor: Colors.white,
+                                    surfaceTintColor: Colors.white,
+                                    title: const Text('Edit Vendor'),
+                                    content: SingleChildScrollView(
+                                      child: FormBuilder(
+                                        key: _formKey,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            FormBuilderTextField(
+                                              name: 'name',
+                                              decoration:
+                                                  inputDecoration('Name'),
+                                              validator: _requiredValidator,
+                                              initialValue: vendor.name,
+                                            ),
+                                            const SizedBox(height: 25),
+                                            MultiSelectDialogField(
+                                              items: _brands
+                                                  .map((brand) =>
+                                                      MultiSelectItem<String>(
+                                                          brand['name'],
+                                                          brand['name']))
+                                                  .toList(),
+                                              title: const Text("Brands"),
+                                              initialValue: vendor
+                                                  .brands, // Use the state variable here
+                                              onConfirm: (List<String> values) {
+                                                setState(() {
+                                                  _selectedBrands =
+                                                      values; // Update the state variable
+                                                });
+                                              },
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              buttonText: const Text(
+                                                "Select Brands",
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              listType:
+                                                  MultiSelectListType.CHIP,
+                                            ),
+                                            const SizedBox(height: 25),
+                                            FormBuilderDropdown(
+                                              name: 'delivery_frequency',
+                                              decoration: inputDecoration(
+                                                  'Delivery Frequency'),
+                                              validator: _requiredValidator,
+                                              initialValue:
+                                                  vendor.deliveryFrequency,
+                                              items: [
+                                                'once',
+                                                'twice',
+                                                'thrice',
+                                                'All days'
+                                              ]
+                                                  .map((frequency) =>
+                                                      DropdownMenuItem(
+                                                          value: frequency,
+                                                          child:
+                                                              Text(frequency)))
+                                                  .toList(),
+                                            ),
+                                            const SizedBox(height: 25),
+                                            MultiSelectDialogField<String>(
+                                              items: _deliveryDays
+                                                  .map((day) =>
+                                                      MultiSelectItem<String>(
+                                                          day, day))
+                                                  .toList(),
+                                              title:
+                                                  const Text("Delivery Days"),
+                                              initialValue: vendor.deliveryDay,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              buttonText: const Text(
+                                                "Delivery Days",
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              onConfirm: (List<String> values) {
+                                                setState(() {
+                                                  _selectedDeliveryDays =
+                                                      values;
+                                                });
+                                              },
+                                              validator: (values) {
+                                                if (values == null ||
+                                                    values.isEmpty) {
+                                                  return 'Please select at least one delivery day';
+                                                }
+                                                return null;
+                                              },
+                                              listType:
+                                                  MultiSelectListType.CHIP,
+                                            ),
+                                            const SizedBox(height: 25),
+                                            MultiSelectDialogField<String>(
+                                              items:
+                                                  _modeOfCommunicationOptions,
+                                              initialValue:
+                                                  vendor.modeOfCommunication,
+                                              title: const Text(
+                                                  "Mode Of Communication"),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              buttonText: const Text(
+                                                "Whatsapp Or Email?",
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              onConfirm: (values) {
+                                                setState(() {
+                                                  _selectMOC = List<
+                                                          String>.from(
+                                                      values); // Update the state variable
+                                                });
+                                              },
+                                              validator: (values) {
+                                                if (values == null ||
+                                                    values.isEmpty) {
+                                                  return 'Please select at least one ';
+                                                }
+                                                return null;
+                                              },
+                                              listType:
+                                                  MultiSelectListType.CHIP,
+                                            ),
+                                            const SizedBox(height: 25),
+                                            FormBuilderTextField(
+                                              name: 'phone',
+                                              initialValue: vendor.phone,
+                                              decoration:
+                                                  inputDecoration('Phone'),
+                                              keyboardType: TextInputType
+                                                  .phone, // Use phone keyboard type for input
+                                              validator: (value) {
+                                                // Basic validation to check if the phone field is not empty
+                                                if (value == null ||
+                                                    value.isEmpty) {
+                                                  return 'Phone number is required.';
+                                                }
+                                                // Additional validation for phone number format can be added here
+                                                // For example, using regular expressions to match specific patterns
+                                                return null;
+                                              },
+                                            ),
+                                            const SizedBox(height: 25),
+                                            FormBuilderTextField(
+                                              name: 'email',
+                                              initialValue: vendor.email,
+                                              decoration:
+                                                  inputDecoration('Email'),
+                                              keyboardType:
+                                                  TextInputType.emailAddress,
+                                              validator: (value) {
+                                                final modeOfCommunication = _formKey
+                                                        .currentState
+                                                        ?.fields[
+                                                            'mode_of_communication']
+                                                        ?.value ??
+                                                    [];
+                                                print(
+                                                    "Selected modes of communication: $modeOfCommunication");
+
+                                                if (modeOfCommunication
+                                                    .contains('email')) {
+                                                  print(
+                                                      "Email mode selected, validating email...");
+                                                  if (value == null ||
+                                                      value.trim().isEmpty) {
+                                                    return 'Email is required when Email is selected as a mode of communication.';
+                                                  }
+                                                  String pattern =
+                                                      r'\S+@\S+\.\S+'; // Simplified regex for email validation
+                                                  RegExp regex =
+                                                      RegExp(pattern);
+                                                  if (!regex.hasMatch(value)) {
+                                                    return 'Enter a valid email address';
+                                                  }
+                                                }
+                                                return null; // No error
+                                              },
+                                            ),
+                                            const SizedBox(height: 25),
+                                            FormBuilderTextField(
+                                              name: 'notes',
+                                              decoration:
+                                                  inputDecoration('Notes'),
+                                              initialValue: vendor.notes,
+                                              maxLines: 20,
+                                              minLines: 1,
+                                              textInputAction:
+                                                  TextInputAction.newline,
+                                              // Make the field expand horizontally to fill the available space
+                                              expands:
+                                                  false, // Allow the field to expand vertically
+                                              keyboardType: TextInputType
+                                                  .multiline, // Allow multiline input
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          _submitFormEdit(context, vendor.id);
+                                        }, // Update the callback here
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFF6200EE),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 10),
+                                        ),
+                                        child: const Text(
+                                          "Edit Vendor",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 20),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.pinkAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                            ),
+                            child: const Text(
+                              "Edit",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF6200EE),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                            ),
+                            child: const Text(
+                              "Close",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                  padding: const EdgeInsets.all(
+                      10), // Add padding inside the container for its children
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5), // Shadow color
+                        spreadRadius: 1, // Spread radius
+                        blurRadius: 7, // Blur radius
+                        offset:
+                            const Offset(0, 3), // Changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(vendor.name,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(
+                          height: 8), // Space between title and chips
+
+                      // Brands chips
+                      Wrap(
+                        spacing: 6, // Space between chips
+                        children: vendor.brands
+                            .map((brand) => Chip(
+                                  label: Text(
+                                    brand,
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                   backgroundColor: const Color.fromARGB(
                                       255,
-                                      149,
-                                      240,
-                                      251), // Background color for days
+                                      11,
+                                      105,
+                                      236), // Chip background color for brands
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     side: const BorderSide(
@@ -806,9 +1156,87 @@ class _VendorListScreenState extends State<VendorListScreen> {
                                   ),
                                 ))
                             .toList(),
-                      ],
-                    ),
-                  ],
+                      ),
+
+                      const SizedBox(
+                          height: 5), // Space between different sets of chips
+
+                      // Phone and Mode of Communication chips
+                      Wrap(
+                        spacing: 6, // Space between chips horizontally
+                        runSpacing:
+                            6, // Space between chips vertically, creating a new "line"
+                        children: [
+                          Chip(
+                            label: Text(vendor.phone),
+                            backgroundColor: Colors
+                                .greenAccent, // Different background color for phone
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: const BorderSide(
+                                  color:
+                                      Colors.transparent), // Transparent border
+                            ),
+                          ),
+                          ...vendor.modeOfCommunication
+                              .map((mode) => Chip(
+                                    label: Text(mode),
+                                    backgroundColor: Colors
+                                        .greenAccent, // Background color for contact modes
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      side: const BorderSide(
+                                          color: Colors
+                                              .transparent), // Transparent border
+                                    ),
+                                  ))
+                              .toList(),
+                        ],
+                      ),
+
+                      const SizedBox(
+                          height: 5), // Space between different sets of chips
+
+                      // Frequency and Delivery Day chips
+                      Wrap(
+                        spacing: 6, // Space between chips
+                        children: [
+                          Chip(
+                            label: Text(
+                              vendor.deliveryFrequency,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            backgroundColor: const Color.fromARGB(255, 11, 105,
+                                236), // Background color for frequency
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: const BorderSide(
+                                  color:
+                                      Colors.transparent), // Transparent border
+                            ),
+                          ),
+                          ...vendor.deliveryDay
+                              .map((day) => Chip(
+                                    label: Text(day),
+                                    backgroundColor: const Color.fromARGB(
+                                        255,
+                                        149,
+                                        240,
+                                        251), // Background color for days
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      side: const BorderSide(
+                                          color: Colors
+                                              .transparent), // Transparent border
+                                    ),
+                                  ))
+                              .toList(),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ));
         },
