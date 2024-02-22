@@ -87,6 +87,11 @@ class _VendorListScreenState extends State<VendorListScreen> {
   }
 
   void _showAddVendorForm() {
+    setState(() {
+      _selectedBrands = [];
+      _selectedDeliveryDays = [];
+      _selectMOC = [];
+    });
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -309,7 +314,10 @@ class _VendorListScreenState extends State<VendorListScreen> {
         );
 
         if (response.statusCode == 200) {
+          Navigator.of(context).pop();
+
           final vendorResponse = Vendor.fromJson(json.decode(response.body));
+
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -328,11 +336,106 @@ class _VendorListScreenState extends State<VendorListScreen> {
               );
             },
           );
+          getVendorList();
         } else {
           print('Failed to add vendor: ${response.body}');
         }
       } catch (e) {
         print('Error submitting form: $e');
+      }
+    }
+  }
+
+  Future<void> _submitFormEdit(BuildContext context, int vendorId) async {
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
+      final formData = _formKey.currentState?.value;
+
+      // Encode the request body and store it in a variable
+      String requestBody = jsonEncode({
+        'id': vendorId,
+        'name': formData?['name'],
+        'brands': _selectedBrands,
+        'phone': formData?['phone'],
+        'email': formData?['email'] ?? "",
+        'delivery_frequency': formData?['delivery_frequency'],
+        'delivery_day': _selectedDeliveryDays,
+        'mode_of_communication': _selectMOC,
+        'notes': formData?['notes'] ?? "",
+      });
+
+      // Print the request body
+      print("HTTP Request Body: $requestBody");
+
+      //return;
+      try {
+        final response = await http.post(
+          Uri.parse(
+              '$baseUrl/vendor-edit'), // Adjust with your actual endpoint URL
+          headers: {'Content-Type': 'application/json'},
+          body: requestBody, // Use the requestBody variable here
+        );
+
+        if (response.statusCode == 200) {
+          Navigator.of(context).pop();
+
+          final vendorResponse = Vendor.fromJson(json.decode(response.body));
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Vendor Edited Successfully"),
+                content: Text(
+                    "Vendor ID: ${vendorResponse.id}\nName: ${vendorResponse.name}"),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text("Close"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          getVendorList();
+        } else {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Error"),
+                content: Text('Failed to edit vendor: ${response.body}'),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text("Close"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          getVendorList();
+        }
+      } catch (e) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Error"),
+              content: Text('Failed to edit vendor: $e'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text("Close"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
       }
     }
   }
@@ -354,6 +457,8 @@ class _VendorListScreenState extends State<VendorListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Vendor List'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
       ),
       body: ListView.builder(
         itemCount: _vendors.length,
@@ -369,27 +474,206 @@ class _VendorListScreenState extends State<VendorListScreen> {
               },
               confirmDismiss: (direction) async {
                 // Show the dialog and return false to prevent the item from being dismissed
+                setState(() {
+                  // Initialize state variables with the existing vendor's values
+                  _selectedBrands = vendor.brands;
+                  _selectedDeliveryDays = vendor.deliveryDay;
+                  _selectMOC = vendor.modeOfCommunication;
+                });
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text("Edit Vendor"),
-                      content: Text(
-                          "Would you like to edit the details for ${vendor.name}?"),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text("No"),
-                          onPressed: () {
-                            Navigator.of(context).pop(
-                                false); // Close the dialog and do not dismiss the item
-                          },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        side: const BorderSide(
+                            color: Colors.black,
+                            width: 2), // Black border with 2px width
+                      ),
+                      backgroundColor: Colors.white,
+                      surfaceTintColor: Colors.white,
+                      title: const Text('Edit Vendor'),
+                      content: SingleChildScrollView(
+                        child: FormBuilder(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              FormBuilderTextField(
+                                name: 'name',
+                                decoration: inputDecoration('Name'),
+                                validator: _requiredValidator,
+                                initialValue: vendor.name,
+                              ),
+                              const SizedBox(height: 25),
+                              MultiSelectDialogField(
+                                items: _brands
+                                    .map((brand) => MultiSelectItem<String>(
+                                        brand['name'], brand['name']))
+                                    .toList(),
+                                title: const Text("Brands"),
+                                initialValue: vendor
+                                    .brands, // Use the state variable here
+                                onConfirm: (List<String> values) {
+                                  setState(() {
+                                    _selectedBrands =
+                                        values; // Update the state variable
+                                  });
+                                },
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                buttonText: const Text(
+                                  "Select Brands",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                listType: MultiSelectListType.CHIP,
+                              ),
+                              const SizedBox(height: 25),
+                              FormBuilderDropdown(
+                                name: 'delivery_frequency',
+                                decoration:
+                                    inputDecoration('Delivery Frequency'),
+                                validator: _requiredValidator,
+                                initialValue: vendor.deliveryFrequency,
+                                items: ['once', 'twice', 'thrice', 'All days']
+                                    .map((frequency) => DropdownMenuItem(
+                                        value: frequency,
+                                        child: Text(frequency)))
+                                    .toList(),
+                              ),
+                              const SizedBox(height: 25),
+                              MultiSelectDialogField<String>(
+                                items: _deliveryDays
+                                    .map((day) =>
+                                        MultiSelectItem<String>(day, day))
+                                    .toList(),
+                                title: const Text("Delivery Days"),
+                                initialValue: vendor.deliveryDay,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                buttonText: const Text(
+                                  "Delivery Days",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                onConfirm: (List<String> values) {
+                                  setState(() {
+                                    _selectedDeliveryDays = values;
+                                  });
+                                },
+                                validator: (values) {
+                                  if (values == null || values.isEmpty) {
+                                    return 'Please select at least one delivery day';
+                                  }
+                                  return null;
+                                },
+                                listType: MultiSelectListType.CHIP,
+                              ),
+                              const SizedBox(height: 25),
+                              MultiSelectDialogField<String>(
+                                items: _modeOfCommunicationOptions,
+                                initialValue: vendor.modeOfCommunication,
+                                title: const Text("Mode Of Communication"),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                buttonText: const Text(
+                                  "Whatsapp Or Email?",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                onConfirm: (values) {
+                                  setState(() {
+                                    _selectMOC = List<String>.from(
+                                        values); // Update the state variable
+                                  });
+                                },
+                                validator: (values) {
+                                  if (values == null || values.isEmpty) {
+                                    return 'Please select at least one ';
+                                  }
+                                  return null;
+                                },
+                                listType: MultiSelectListType.CHIP,
+                              ),
+                              const SizedBox(height: 25),
+                              FormBuilderTextField(
+                                name: 'phone',
+                                initialValue: vendor.phone,
+                                decoration: inputDecoration('Phone'),
+                                keyboardType: TextInputType
+                                    .phone, // Use phone keyboard type for input
+                                validator: (value) {
+                                  // Basic validation to check if the phone field is not empty
+                                  if (value == null || value.isEmpty) {
+                                    return 'Phone number is required.';
+                                  }
+                                  // Additional validation for phone number format can be added here
+                                  // For example, using regular expressions to match specific patterns
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 25),
+                              FormBuilderTextField(
+                                name: 'email',
+                                initialValue: vendor.email,
+                                decoration: inputDecoration('Email'),
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  final modeOfCommunication = _formKey
+                                          .currentState
+                                          ?.fields['mode_of_communication']
+                                          ?.value ??
+                                      [];
+                                  print(
+                                      "Selected modes of communication: $modeOfCommunication");
+
+                                  if (modeOfCommunication.contains('email')) {
+                                    print(
+                                        "Email mode selected, validating email...");
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Email is required when Email is selected as a mode of communication.';
+                                    }
+                                    String pattern =
+                                        r'\S+@\S+\.\S+'; // Simplified regex for email validation
+                                    RegExp regex = RegExp(pattern);
+                                    if (!regex.hasMatch(value)) {
+                                      return 'Enter a valid email address';
+                                    }
+                                  }
+                                  return null; // No error
+                                },
+                              ),
+                              const SizedBox(height: 25),
+                              FormBuilderTextField(
+                                name: 'notes',
+                                decoration: inputDecoration('Notes'),
+                                initialValue: vendor.notes,
+                              ),
+                            ],
+                          ),
                         ),
-                        TextButton(
-                          child: const Text("Yes"),
+                      ),
+                      actions: <Widget>[
+                        ElevatedButton(
                           onPressed: () {
-                            Navigator.of(context).pop(); // Close the dialog
-                            // Navigate to the edit page or perform edit actions here
-                          },
+                            _submitFormEdit(context, vendor.id);
+                          }, // Update the callback here
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF6200EE),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                          ),
+                          child: const Text(
+                            "Edit Vendor",
+                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          ),
                         ),
                       ],
                     );
@@ -428,10 +712,15 @@ class _VendorListScreenState extends State<VendorListScreen> {
                           .map((brand) => Chip(
                                 label: Text(
                                   brand,
-                                  style: const TextStyle(color: Colors.white),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                backgroundColor: Colors
-                                    .deepPurpleAccent, // Chip background color for brands
+                                backgroundColor: const Color.fromARGB(
+                                    255,
+                                    11,
+                                    105,
+                                    236), // Chip background color for brands
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   side: const BorderSide(
@@ -486,9 +775,14 @@ class _VendorListScreenState extends State<VendorListScreen> {
                       spacing: 6, // Space between chips
                       children: [
                         Chip(
-                          label: Text(vendor.deliveryFrequency),
-                          backgroundColor: const Color.fromARGB(255, 149, 240,
-                              251), // Background color for frequency
+                          label: Text(
+                            vendor.deliveryFrequency,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          backgroundColor: const Color.fromARGB(255, 11, 105,
+                              236), // Background color for frequency
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                             side: const BorderSide(
@@ -521,7 +815,7 @@ class _VendorListScreenState extends State<VendorListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddVendorForm,
-        backgroundColor: Colors.deepPurpleAccent,
+        backgroundColor: const Color.fromARGB(255, 0, 0, 0),
         tooltip: 'Add Vendor',
         child: const Icon(
           Icons.person_add_sharp,
