@@ -29,6 +29,7 @@ class ItemApiClient {
       print("Items Length ${items.length} First Item: ${items[0].name}");
       return items;
     } else {
+      print("Error: ${response.statusCode} ${response.body}");
       throw Exception('Failed to load items');
     }
   }

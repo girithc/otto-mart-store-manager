@@ -19,6 +19,7 @@ class CategoryApiClient {
           jsonData.map((item) => Category.fromJson(item)).toList();
       return categories;
     } else {
+      print("Error: ${response.statusCode} ${response.body}");
       throw Exception('Failed to load categories');
     }
   }
