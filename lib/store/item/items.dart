@@ -38,6 +38,7 @@ class _ItemsState extends State<Items> {
 
         await http.get(Uri.parse('$baseUrl/manager-items'));
 
+    print("Response: ${response.body}");
     if (response.statusCode == 200) {
       print("Success: ${response.body}");
       List<dynamic> itemsJson = json.decode(response.body);
@@ -81,7 +82,7 @@ class _ItemsState extends State<Items> {
                 )
               },
               child: Container(
-                  margin: EdgeInsets.all(6),
+                  margin: const EdgeInsets.all(6),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -91,7 +92,8 @@ class _ItemsState extends State<Items> {
                         color: Colors.grey.withOpacity(0.3),
                         spreadRadius: 1,
                         blurRadius: 1,
-                        offset: Offset(0, 1), // changes position of shadow
+                        offset:
+                            const Offset(0, 1), // changes position of shadow
                       ),
                     ],
                   ),
