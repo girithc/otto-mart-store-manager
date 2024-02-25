@@ -1,22 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:store/add-item/add-items.dart';
-import 'package:store/store/item-detail/item-details.dart';
-import 'package:store/store/item/edit.dart';
+import 'package:store/store/item/view.dart';
 import 'package:store/utils/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:carousel_slider/carousel_slider.dart';
 
 class Items extends StatefulWidget {
-  const Items(
-      {required this.categoryId,
-      required this.categoryName,
-      required this.storeId,
-      super.key});
-  final int categoryId;
-  final String categoryName;
-  final int storeId;
+  const Items({super.key});
 
   @override
   State<Items> createState() => _ItemsState();
@@ -32,15 +23,11 @@ class _ItemsState extends State<Items> {
   }
 
   Future<void> fetchItems() async {
-    final response =
+    final response = await http.get(Uri.parse('$baseUrl/manager-items'));
 
-        // ...
-
-        await http.get(Uri.parse('$baseUrl/manager-items'));
-
-    print("Response: ${response.body}");
+    //print("Response: ${response.body}");
     if (response.statusCode == 200) {
-      print("Success: ${response.body}");
+      //print("Success: ${response.body}");
       List<dynamic> itemsJson = json.decode(response.body);
       setState(() {
         items = itemsJson.map((jsonItem) => Item.fromJson(jsonItem)).toList();
@@ -67,7 +54,7 @@ class _ItemsState extends State<Items> {
               crossAxisCount: 2,
               mainAxisSpacing: 0.0,
               crossAxisSpacing: 0.0,
-              childAspectRatio: 0.8),
+              childAspectRatio: 0.65),
           itemCount: items.length,
           itemBuilder: (context, index) {
             return GestureDetector(
@@ -75,7 +62,7 @@ class _ItemsState extends State<Items> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditItemPage(
+                    builder: (context) => ViewItemPage(
                       item: items[index],
                     ),
                   ),
@@ -100,14 +87,86 @@ class _ItemsState extends State<Items> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Expanded(
+                        child: items[index].imageUrls.isNotEmpty
+                            ? CarouselSlider(
+                                options: CarouselOptions(
+                                  aspectRatio: 1.5,
+                                  enlargeCenterPage: true,
+                                  viewportFraction: 0.8,
+                                  initialPage: 0,
+                                  autoPlay: true,
+                                ),
+                                items: items[index].imageUrls.map((imageUrl) {
+                                  return Builder(
+                                    builder: (BuildContext context) {
+                                      return Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent? loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          }
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes!
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return const SizedBox(
+                                            height: 50,
+                                            child: Center(
+                                                child: Icon(Icons.error)),
+                                          ); // Error icon when image fails to load
+                                        },
+                                      );
+                                    },
+                                  );
+                                }).toList(),
+                              )
+                            : const Center(
+                                child: Icon(Icons
+                                    .image_not_supported), // Show a "no image" icon when there are no images
+                              ),
+                      ),
                       Text(items[index].name),
-                      Text(items[index].description),
+                      //Text(items[index].description),
+
                       Chip(
                         label: Text(
                           items[index].brandName,
                           style: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
+                        backgroundColor: const Color.fromARGB(255, 11, 105,
+                            236), // Chip background color for brands
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(
+                              color: Colors.transparent), // Transparent border
+                        ),
+                      ),
+                      Chip(
+                        label: Text(
+                          "${items[index].quantity} ${items[index].unitOfQuantity}",
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal),
+                        ),
+
                         backgroundColor: Colors
                             .greenAccent, // Chip background color for brands
                         shape: RoundedRectangleBorder(
@@ -116,6 +175,7 @@ class _ItemsState extends State<Items> {
                               color: Colors.transparent), // Transparent border
                         ),
                       ),
+                      /*
                       Wrap(
                         spacing: 6, // Space between chips
                         children: items[index]
@@ -141,6 +201,7 @@ class _ItemsState extends State<Items> {
                                 ))
                             .toList(),
                       ),
+                      */
                     ],
                   )),
             );

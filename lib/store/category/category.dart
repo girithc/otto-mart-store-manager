@@ -8,9 +8,6 @@ class CategoryApiClient {
   Future<List<Category>> fetchCategories() async {
     var url = Uri.parse('$baseUrl/category');
 
-    //var queryParams = {'id': id.toString()};
-    //url = url.replace(queryParameters: queryParams);
-
     http.Response response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -22,6 +19,37 @@ class CategoryApiClient {
       print("Error: ${response.statusCode} ${response.body}");
       throw Exception('Failed to load categories');
     }
+  }
+
+  Future<List<Brand>> fetchBrands() async {
+    var url = Uri.parse('$baseUrl/get-brand');
+
+    http.Response response = await http.get(url);
+
+    //print("Response: ${response.statusCode} ${response.body}");
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = json.decode(response.body);
+      final List<Brand> brands =
+          jsonData.map((item) => Brand.fromJson(item)).toList();
+      return brands;
+    } else {
+      print("Error: ${response.statusCode} ${response.body}");
+      throw Exception('Failed to load brands');
+    }
+  }
+}
+
+class Brand {
+  final int id;
+  final String name;
+
+  Brand({required this.id, required this.name});
+
+  factory Brand.fromJson(Map<String, dynamic> json) {
+    return Brand(
+      id: json['id'],
+      name: json['name'],
+    );
   }
 }
 

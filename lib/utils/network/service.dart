@@ -27,8 +27,8 @@ class NetworkService {
     // Add additional data if provided
     if (additionalData != null &&
         endpoint != '/login-customer' &&
-        endpoint != '/verify-otp' &&
-        endpoint != '/send-otp') {
+        endpoint != '/verify-otp-manager' &&
+        endpoint != '/send-otp-manager') {
       additionalData.addAll(authBody);
     }
 
@@ -43,6 +43,9 @@ class NetworkService {
       headers: headers,
       body: json.encode(additionalData),
     );
+
+    print(
+        "Response body: ${response.body}  Status code: ${response.statusCode}");
 
     return response;
   }

@@ -5,11 +5,10 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:store/main.dart';
-import 'package:store/utils/login/page/phone.dart';
-import 'package:store/utils/login/provider/loginProvider.dart';
-import 'package:store/utils/network/service.dart';
 import 'package:pinput/pinput.dart';
+import 'package:store/main.dart';
+import 'package:store/utils/login/page/phone_screen.dart';
+import 'package:store/utils/network/service.dart';
 
 class MyVerify extends StatefulWidget {
   const MyVerify({Key? key, required this.number, required this.isTester})
@@ -21,7 +20,8 @@ class MyVerify extends StatefulWidget {
 }
 
 class _MyVerifyState extends State<MyVerify> {
-  Packer? packer;
+  late CustomerApiClient apiClient; // Declare apiClient here
+  late Customer customer;
 
   final storage = const FlutterSecureStorage();
   String? fcmToken;
@@ -38,6 +38,7 @@ class _MyVerifyState extends State<MyVerify> {
   @override
   void initState() {
     super.initState();
+    apiClient = CustomerApiClient(widget.number);
     _retrieveFCMToken();
     startTimer();
   }
@@ -75,6 +76,15 @@ class _MyVerifyState extends State<MyVerify> {
     super.dispose();
   }
 
+  Future<void> checkLoginStatus() async {
+    const storage = FlutterSecureStorage();
+    final customerId = await storage.read(key: 'managerId');
+
+    setState(() {
+      isLoggedIn = customerId != null;
+    });
+  }
+
   void startTimer() {
     const oneSec = Duration(seconds: 1);
     _timer = Timer.periodic(
@@ -108,7 +118,26 @@ class _MyVerifyState extends State<MyVerify> {
     );
   }
 
-  Future<PackerLoginResponse?> verifyOTP(String phoneNumber, String otp) async {
+  Future<bool> loginCustomer() async {
+    try {
+      final loggedCustomer = await apiClient.loginCustomer();
+      setState(() {
+        customer = loggedCustomer;
+        isLoggedIn = true;
+      });
+
+      // Store the user's credentials securely
+      await storage.write(key: 'managerId', value: customer.id.toString());
+      await storage.write(key: 'phone', value: customer.phone.toString());
+
+      return true; // Login was successful
+    } catch (err) {
+      return false; // Login failed
+    }
+  }
+
+  Future<ManagerLoginResponse?> verifyOTP(
+      String phoneNumber, String otp) async {
     try {
       //final fcm = await storage.read(key: 'fcm');
       final Map<String, dynamic> requestData = {
@@ -118,7 +147,7 @@ class _MyVerifyState extends State<MyVerify> {
       };
 
       final networkService = NetworkService();
-      final response = await networkService.postWithAuth('/verify-otp-packer',
+      final response = await networkService.postWithAuth('/verify-otp-manager',
           additionalData: requestData);
 
       if (response.statusCode == 200) {
@@ -126,18 +155,20 @@ class _MyVerifyState extends State<MyVerify> {
         print(response.body);
         // Successfully verified OTP, parse the response
         Map<String, dynamic> jsonResponse = json.decode(response.body);
-        final packerLoginResponse = PackerLoginResponse.fromJson(jsonResponse);
+        final customerLoginResponse =
+            ManagerLoginResponse.fromJson(jsonResponse);
         await storage.write(
-            key: 'authToken', value: packerLoginResponse.packer?.token);
+            key: 'authToken', value: customerLoginResponse.customer?.token);
         await storage.write(
-            key: 'packerId', value: packerLoginResponse.packer?.id.toString());
+            key: 'managerId',
+            value: customerLoginResponse.customer?.id.toString());
         await storage.write(
-            key: 'phone', value: packerLoginResponse.packer?.phone);
+            key: 'phone', value: customerLoginResponse.customer?.phone);
 
-        return packerLoginResponse;
+        return customerLoginResponse;
       } else {
         // Handle HTTP request error by creating a response with the error message
-        return PackerLoginResponse(
+        return ManagerLoginResponse(
           message: response.reasonPhrase ?? "Unknown error",
           type: "error",
         );
@@ -150,18 +181,19 @@ class _MyVerifyState extends State<MyVerify> {
 
   @override
   Widget build(BuildContext context) {
-    const focusedBorderColor = Colors.deepPurpleAccent;
-    const fillColor = Color.fromRGBO(243, 246, 249, 0);
-    const borderColor = Colors.greenAccent;
+    const focusedBorderColor = Colors.greenAccent;
+    const fillColor = Colors.greenAccent;
+    const borderColor = Colors.white;
 
     final defaultPinTheme = PinTheme(
-      width: 56,
-      height: 56,
+      width: 40,
+      height: 50,
       textStyle: const TextStyle(
-        fontSize: 22,
-        color: Color.fromRGBO(30, 60, 87, 1),
+        fontSize: 18,
+        color: Colors.white,
       ),
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(19),
         border: Border.all(color: borderColor),
       ),
@@ -169,36 +201,45 @@ class _MyVerifyState extends State<MyVerify> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Container(
-        margin: const EdgeInsets.only(left: 25, right: 25),
-        alignment: Alignment.center,
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.deepPurpleAccent, // Start color of the gradient
+                Colors.lightBlueAccent, // End color of the gradient
+              ],
+              stops: [
+                0.55,
+                1.0,
+              ]),
+        ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               //Text(fcmToken ?? 'FCM Token not found'),
-              Image.asset(
-                'assets/icon/icon.jpeg',
-                height: 250,
-              ),
-              const SizedBox(
-                height: 25,
+
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.25,
               ),
               const Text(
-                "Phone Verification",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                "OTP Verification",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(
-                height: 5,
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.01,
               ),
               const Text(
-                "Enter One Time Password",
+                "Enter OTP sent to your phone number",
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(
-                height: 20,
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.04,
               ),
               AutofillGroup(
                 child: Pinput(
@@ -211,7 +252,8 @@ class _MyVerifyState extends State<MyVerify> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const MyHomePage()),
+                                    builder: (context) => const MyHomePage(),
+                                  ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context)
@@ -241,19 +283,34 @@ class _MyVerifyState extends State<MyVerify> {
                         isPinCorrect =
                             true; // Set flag to true if pin is correct
                       });
-                      return null;
+
+                      String otp = pinController.text;
+                      isPinCorrect
+                          ? verifyOTP(widget.number, otp).then((value) {
+                              if (value!.type == 'success') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const MyHomePage(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text('OTP Invalid'),
+                                  backgroundColor: Colors.deepOrangeAccent,
+                                ));
+                              }
+                            })
+                          : null; // Button is disabled if isPinCorrect is false
                     } else {
                       setState(() {
                         isPinCorrect =
                             false; // Set flag to false if pin is incorrect
                       });
-                      return null; // Validation message
                     }
+                    return null;
                   },
-                  // onClipboardFound: (value) {
-                  //   debugPrint('onClipboardFound: $value');
-                  //   pinController.setText(value);
-                  // },
                   hapticFeedbackType: HapticFeedbackType.lightImpact,
                   onCompleted: (pin) {
                     debugPrint('onCompleted: $pin');
@@ -265,7 +322,8 @@ class _MyVerifyState extends State<MyVerify> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const MyHomePage()),
+                                  builder: (context) => const MyHomePage(),
+                                ),
                               );
                             } else {
                               ScaffoldMessenger.of(context)
@@ -289,15 +347,17 @@ class _MyVerifyState extends State<MyVerify> {
                     ],
                   ),
                   focusedPinTheme: defaultPinTheme.copyWith(
+                    textStyle: const TextStyle(color: Colors.black),
                     decoration: defaultPinTheme.decoration!.copyWith(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: focusedBorderColor),
-                    ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white),
+                        color: Colors.greenAccent),
                   ),
                   submittedPinTheme: defaultPinTheme.copyWith(
+                    textStyle: const TextStyle(color: Colors.black),
                     decoration: defaultPinTheme.decoration!.copyWith(
                       color: isPinCorrect
-                          ? Colors.lightGreenAccent
+                          ? Colors.greenAccent
                           : fillColor, // Change color based on pin correctness
                       borderRadius: BorderRadius.circular(19),
                       border: Border.all(color: focusedBorderColor),
@@ -308,18 +368,18 @@ class _MyVerifyState extends State<MyVerify> {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 20,
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.04,
               ),
               Container(
                 width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 15),
-                height: 55,
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                height: 50,
                 child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurpleAccent,
+                      backgroundColor: const Color.fromARGB(255, 0, 11, 128),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(35),
                       ),
                     ),
                     onPressed: () {
@@ -330,7 +390,8 @@ class _MyVerifyState extends State<MyVerify> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const MyHomePage()),
+                                    builder: (context) => const MyHomePage(),
+                                  ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context)
@@ -351,26 +412,32 @@ class _MyVerifyState extends State<MyVerify> {
                     )),
               ),
               Container(
-                margin: const EdgeInsets.only(top: 20, left: 12),
+                margin: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.width * 0.05,
+                    left: MediaQuery.of(context).size.width * 0.04),
                 alignment: Alignment.centerLeft,
                 child: (_start > 0)
-                    ? Text(
-                        "Resend OTP: $_start seconds",
-                        style: const TextStyle(
-                            color: Colors.deepPurple,
-                            fontWeight: FontWeight.bold),
-                      )
+                    ? TextButton(
+                        onPressed: () => {},
+                        child: Text(
+                          "Resend OTP: $_start seconds",
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal),
+                        ))
                     : TextButton(
                         onPressed: () => resendOTP(),
                         child: const Text(
                           "Resend OTP",
-                          style: TextStyle(color: Colors.deepPurple),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
               ),
-              Row(
-                children: [
-                  TextButton(
+              Container(
+                  alignment: Alignment.centerLeft,
+                  margin: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.04),
+                  child: TextButton(
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
@@ -382,11 +449,9 @@ class _MyVerifyState extends State<MyVerify> {
                       child: Text(
                         "Edit Phone Number ${widget.number} ? ",
                         style: const TextStyle(
-                          color: Colors.deepPurple,
+                          color: Colors.white,
                         ),
-                      ))
-                ],
-              )
+                      )))
             ],
           ),
         ),
@@ -395,54 +460,99 @@ class _MyVerifyState extends State<MyVerify> {
   }
 }
 
-class Logger {}
-
-class PackerLoginResponse {
+class ManagerLoginResponse {
   final String message;
   final String type;
-  PackerLogin? packer;
+  ManagerLogin? customer;
 
-  PackerLoginResponse({
+  ManagerLoginResponse({
     required this.message,
     required this.type,
-    this.packer,
+    this.customer,
   });
 
-  factory PackerLoginResponse.fromJson(Map<String, dynamic> json) {
-    return PackerLoginResponse(
+  factory ManagerLoginResponse.fromJson(Map<String, dynamic> json) {
+    return ManagerLoginResponse(
       message: json['message'],
       type: json['type'],
-      packer: PackerLogin.fromJson(json['Packer']),
+      customer: ManagerLogin.fromJson(json['Manager']),
     );
   }
 }
 
-class PackerLogin {
+class ManagerLogin {
   final int id;
   final String name;
   final String phone;
-  final String address;
   final DateTime createdAt;
   final String
       token; // Adjusted for Dart, as it doesn't have a built-in UUID type
 
-  PackerLogin({
+  ManagerLogin({
+    required this.id,
+    required this.name,
+    required this.phone,
+    required this.createdAt,
+    required this.token,
+  });
+
+  factory ManagerLogin.fromJson(Map<String, dynamic> json) {
+    return ManagerLogin(
+      id: json['id'],
+      name: json['name'],
+      phone: json['phone'],
+      createdAt: DateTime.parse(json['created_at']),
+      token: json['token'],
+    );
+  }
+}
+
+class CustomerApiClient {
+  CustomerApiClient(this.phone);
+
+  final String phone; // Assuming phone is an integer
+
+  Future<Customer> loginCustomer() async {
+    final Map<String, dynamic> requestData = {
+      "phone": phone,
+    };
+    final networkService = NetworkService();
+
+    final response = await networkService.postWithAuth('login-customer',
+        additionalData: requestData);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseBody = json.decode(response.body);
+      final Customer customer = Customer.fromJson(responseBody);
+      return customer;
+    } else {
+      throw Exception('Failed to login Customer');
+    }
+  }
+}
+
+class Customer {
+  final int id;
+  final String name;
+  final String phone;
+  final String address;
+  final String createdAt;
+
+  Customer({
     required this.id,
     required this.name,
     required this.phone,
     required this.address,
     required this.createdAt,
-    required this.token,
   });
 
-  factory PackerLogin.fromJson(Map<String, dynamic> json) {
-    return PackerLogin(
+  factory Customer.fromJson(Map<String, dynamic> json) {
+    return Customer(
       id: json['id'],
       name: json['name'],
       phone: json['phone'],
       address: json['address'],
-      createdAt: DateTime.parse(json['created_at']),
-      token: json['token'],
+      createdAt: json['created_at'],
     );
   }
 }

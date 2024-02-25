@@ -62,11 +62,7 @@ class _CategoriesState extends State<Categories> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Items(
-                      categoryId: categories[index].id,
-                      categoryName: categories[index].name,
-                      storeId: widget.storeId,
-                    ),
+                    builder: (context) => const Items(),
                   ),
                 )
               },
