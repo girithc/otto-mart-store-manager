@@ -46,6 +46,7 @@ class _EditItemPageState extends State<EditItemPage> {
     super.initState();
     fetchCategories();
     fetchBrands();
+    _selectedCategories = widget.item.categoryNames;
   }
 
   Future<void> fetchCategories() async {
@@ -292,8 +293,7 @@ class _EditItemPageState extends State<EditItemPage> {
         'description': formData?['editdescription'],
         'size': int.tryParse(formData?['editsize'] ?? '0'),
         'unit': formData?['editunit'],
-        'categories':
-            _selectedCategories, // Assuming _selectedCategories is a List<int> of selected category IDs
+        'categories': _selectedCategories,
       };
 
       // Send the HTTP request
