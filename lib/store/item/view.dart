@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:store/store/item/edit.dart';
+import 'package:store/store/item/finance.dart';
 import 'package:store/store/item/image.dart';
 import 'package:store/store/item/items.dart';
 
@@ -76,14 +77,18 @@ class _ViewItemPageState extends State<ViewItemPage> {
                             options: CarouselOptions(
                               enlargeCenterPage: true,
                               viewportFraction:
-                                  0.6, // Adjust the fraction to suit your design
+                                  1, // Adjust the fraction to suit your design
                               initialPage: 0,
                               autoPlay: true,
                             ),
                             items: widget.item.imageUrls.map((imageUrl) {
                               return Builder(
                                 builder: (BuildContext context) {
-                                  return SizedBox(
+                                  return Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        color: Colors.white),
                                     height: MediaQuery.of(context).size.height *
                                         0.3, // Set the height to 30% of the screen height
                                     width: double.infinity,
@@ -138,6 +143,36 @@ class _ViewItemPageState extends State<ViewItemPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          margin: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.only(
+                              bottom: 0.0, top: 0, left: 5, right: 5),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ItemFinance(itemId: widget.item.id),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.greenAccent,
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                            ),
+                            child: const Text(
+                              'Financials',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                         const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(

@@ -15,6 +15,8 @@ class Items extends StatefulWidget {
 
 class _ItemsState extends State<Items> {
   List<Item> items = [];
+  final CarouselController _controller = CarouselController();
+  int _current = 0; // Current index of the carousel
 
   @override
   void initState() {
@@ -39,7 +41,6 @@ class _ItemsState extends State<Items> {
     }
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,52 +91,32 @@ class _ItemsState extends State<Items> {
                       Expanded(
                         child: items[index].imageUrls.isNotEmpty
                             ? CarouselSlider(
-                                options: CarouselOptions(
-                                  aspectRatio: 1.5,
-                                  enlargeCenterPage: true,
-                                  viewportFraction: 0.8,
-                                  initialPage: 0,
-                                  autoPlay: true,
-                                ),
-                                items: items[index].imageUrls.map((imageUrl) {
+                                items: items.map((item) {
                                   return Builder(
                                     builder: (BuildContext context) {
                                       return Image.network(
-                                        imageUrl,
+                                        item.imageUrls[
+                                            0], // Assuming each item has at least one imageUrl
                                         fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        loadingBuilder: (BuildContext context,
-                                            Widget child,
-                                            ImageChunkEvent? loadingProgress) {
-                                          if (loadingProgress == null) {
-                                            return child;
-                                          }
-                                          return Center(
-                                            child: CircularProgressIndicator(
-                                              value: loadingProgress
-                                                          .expectedTotalBytes !=
-                                                      null
-                                                  ? loadingProgress
-                                                          .cumulativeBytesLoaded /
-                                                      loadingProgress
-                                                          .expectedTotalBytes!
-                                                  : null,
-                                            ),
-                                          );
-                                        },
-                                        errorBuilder: (BuildContext context,
-                                            Object exception,
-                                            StackTrace? stackTrace) {
-                                          return const SizedBox(
-                                            height: 50,
-                                            child: Center(
-                                                child: Icon(Icons.error)),
-                                          ); // Error icon when image fails to load
-                                        },
+                                        width:
+                                            MediaQuery.of(context).size.width,
                                       );
                                     },
                                   );
                                 }).toList(),
+                                carouselController: _controller,
+                                options: CarouselOptions(
+                                    autoPlay: true,
+                                    enlargeCenterPage: true,
+                                    viewportFraction:
+                                        1.0, // Ensure only one image is shown at a time
+                                    aspectRatio: 2.0,
+                                    onPageChanged: (index, reason) {
+                                      setState(() {
+                                        _current =
+                                            index; // Update the current index of the carousel
+                                      });
+                                    }),
                               )
                             : const Center(
                                 child: Icon(Icons

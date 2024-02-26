@@ -296,6 +296,100 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     )
                   ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                        onTap: () => {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const Stores()),
+                          )
+                        },
+                        child: Center(
+                          child: Container(
+                            margin: const EdgeInsets.only(
+                                left: 15, right: 7.5, top: 7.5, bottom: 7.5),
+                            height: MediaQuery.of(context).size.height * 0.2,
+                            width: MediaQuery.of(context).size.width * 0.85,
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.circular(15), // Rounded borders
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey
+                                      .withOpacity(0.2), // Shadow color
+                                  spreadRadius: 0,
+                                  blurRadius: 20, // Increased shadow blur
+                                  offset: const Offset(
+                                      0, 10), // Increased vertical offset
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'New Item',
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ShelfPage()),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(
+                              left: 7.5, top: 7.5, bottom: 7.5, right: 15),
+                          height: MediaQuery.of(context).size.height * 0.2,
+                          width: MediaQuery.of(context).size.width * 0.85,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(15), // Rounded borders
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey
+                                    .withOpacity(0.2), // Shadow color
+                                spreadRadius: 0,
+                                blurRadius: 20, // Increased shadow blur
+                                offset: const Offset(
+                                    0, 10), // Increased vertical offset
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Scan Item',
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
                 )
 
                 /*
