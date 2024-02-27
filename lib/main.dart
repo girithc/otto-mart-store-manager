@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -8,6 +10,7 @@ import 'package:store/store/item/items.dart';
 import 'package:store/store/stores.dart';
 import 'package:store/utils/login/page/phone_screen.dart';
 import 'package:store/utils/login/provider/loginProvider.dart';
+import 'package:store/utils/network/service.dart';
 import 'package:store/vendor/vendor_home.dart';
 
 void main() async {
@@ -351,12 +354,92 @@ class _MyHomePageState extends State<MyHomePage> {
                     Expanded(
                       flex: 1,
                       child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const ShelfPage()),
-                          );
+                        onTap: () async {
+                          try {
+                            final networkService = NetworkService();
+                            final response = await networkService.postWithAuth(
+                                '/manager-item-store-combo',
+                                additionalData: {});
+
+                            print("Response: ${response.body}");
+                            if (response.statusCode == 200) {
+                              // Decode the response body
+
+                              final result = json.decode(response.body);
+
+                              // Check if the result is true or false
+                              if (result == true) {
+                                // Show success dialog
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Success'),
+                                      content: const Text(
+                                          'Operation was successful.'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(); // Dismiss dialog
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              } else {
+                                // Show failure dialog
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Failure'),
+                                      content: const Text('Operation failed.'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(); // Dismiss dialog
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            } else {
+                              // If the server did not return a 200 OK response,
+                              // then throw an exception.
+                              throw Exception('Failed to load data');
+                            }
+                          } catch (e) {
+                            /*
+                            // Handle exception by showing a dialog, snackbar, etc.
+                            print(e); // For debugging purposes
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Error'),
+                                  content: Text('An error occurred: $e'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context)
+                                            .pop(); // Dismiss dialog
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                          */
+                          }
                         },
                         child: Container(
                           margin: const EdgeInsets.only(
@@ -380,7 +463,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           child: const Center(
                             child: Text(
-                              'Scan Item',
+                              'Item Store Combo',
                               style: TextStyle(
                                   fontSize: 25,
                                   color: Colors.black,
@@ -389,7 +472,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 )
 
