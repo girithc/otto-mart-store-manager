@@ -72,7 +72,7 @@ class _FindItemState extends State<FindItem> {
                     ),
                     child: Text(
                       item.name,
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
