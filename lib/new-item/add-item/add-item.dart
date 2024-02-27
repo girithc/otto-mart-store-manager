@@ -279,25 +279,24 @@ class _AddItemState extends State<AddItem> {
       final formData = _formKey.currentState?.value;
       // Construct the request payload
       Map<String, dynamic> payload = {
-        'id': formData?['editid'],
+        //'id': formData?['editid'],
         'name': formData?['editname'],
         'brand_id': formData?['editbrand'],
         'description': formData?['editdescription'],
-        'size': int.tryParse(formData?['editsize'] ?? '0'),
-        'unit': formData?['editunit'],
-        'categories': _selectedCategories,
+        'quantity': int.tryParse(formData?['editsize'] ?? '0'),
+        'unit_of_quantity': formData?['editunit'],
+        'category_names': _selectedCategories,
       };
 
-      print("$payload");
-      return;
       // Send the HTTP request
       try {
         final networkService = NetworkService();
         final response = await networkService.postWithAuth(
-          '/manager-item-add',
+          '/manager-add-new-item',
           additionalData: payload,
         );
 
+        print("Response status: ${response.statusCode} ${response.body}");
         // Check if the request was successful
         if (response.statusCode == 200) {
           // Parse the response body if needed
