@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:store/new-item/add-item/add-item.dart';
 import 'package:store/new-item/finance/finance.dart';
+import 'package:store/store/item/view.dart';
 import 'package:store/utils/network/service.dart';
 
 class FindItem extends StatefulWidget {
@@ -24,10 +25,8 @@ class _FindItemState extends State<FindItem> {
     final response = await networkService.postWithAuth('/manager-search-item',
         additionalData: data);
 
-    //print("Response Search: ${response.body}");
-    if (response.statusCode == 200 &&
-        response.body != "null" &&
-        response.body != null) {
+    print("Response Search: ${response.body}");
+    if (response.statusCode == 200 && response.body != "null") {
       List<dynamic> jsonResponse = json.decode(response.body);
       setState(() {
         _items = jsonResponse.map((item) => Item.fromJson(item)).toList();
@@ -45,7 +44,7 @@ class _FindItemState extends State<FindItem> {
     return Scaffold(
       appBar: AppBar(
         title: TextField(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Search For Item',
             hintStyle: TextStyle(color: Colors.black),
           ),
@@ -57,8 +56,8 @@ class _FindItemState extends State<FindItem> {
         itemBuilder: (BuildContext context, int index) {
           final item = _items[index];
           return Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-            margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: Colors.greenAccent,
@@ -85,7 +84,7 @@ class _FindItemState extends State<FindItem> {
                 children: [
                   Text(
                     '${item.size} ${item.unitOfQuantity}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(item.description),
                 ],
@@ -97,10 +96,10 @@ class _FindItemState extends State<FindItem> {
                       height: 100,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return Text('No Image');
+                        return const Text('No Image');
                       },
                     )
-                  : Text('No Image'),
+                  : const Text('No Image'),
               tileColor: Colors.white,
               trailing: Wrap(
                 spacing: 5, // Space between containers horizontally
@@ -119,7 +118,7 @@ class _FindItemState extends State<FindItem> {
                           ),
                         ),
                         child: Container(
-                          padding: EdgeInsets.all(6),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -130,11 +129,11 @@ class _FindItemState extends State<FindItem> {
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 5,
                       ),
                       Container(
-                        padding: EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -144,11 +143,11 @@ class _FindItemState extends State<FindItem> {
                           style: TextStyle(color: Colors.black, fontSize: 10),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 5,
                       ),
                       Container(
-                        padding: EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -174,7 +173,7 @@ class _FindItemState extends State<FindItem> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddItem(),
+                builder: (context) => const AddItem(),
               ),
             );
           },

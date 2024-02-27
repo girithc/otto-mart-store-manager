@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:provider/provider.dart';
-import 'package:store/new-item/newItem.dart';
+import 'package:store/new-item/find-item/find-item.dart';
 import 'package:store/shelf/shelf.dart';
 import 'package:store/store/item/items.dart';
 import 'package:store/store/stores.dart';
@@ -308,7 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const NewItemPage()),
+                                builder: (context) => const FindItem()),
                           )
                         },
                         child: Center(

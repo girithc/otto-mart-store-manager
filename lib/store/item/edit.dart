@@ -7,6 +7,7 @@ import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 import 'package:store/store/category/category.dart';
 import 'package:store/store/item/items.dart';
+import 'package:store/store/item/view.dart';
 import 'package:store/utils/network/service.dart';
 
 class EditItemPage extends StatefulWidget {
@@ -311,6 +312,7 @@ class _EditItemPageState extends State<EditItemPage> {
           print("Response: $responseData  ");
 
           // Show a success dialog
+          // ignore: use_build_context_synchronously
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -321,8 +323,14 @@ class _EditItemPageState extends State<EditItemPage> {
                   child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the dialog
-                    Navigator.of(context)
-                        .pop(); // Optionally, go back to the previous screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ViewItemPage(
+                          itemId: widget.item.id,
+                        ),
+                      ),
+                    );
                   },
                 ),
               ],

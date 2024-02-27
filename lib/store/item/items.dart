@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:store/main.dart';
 import 'package:store/store/item/view.dart';
 import 'package:store/utils/constants.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +17,7 @@ class Items extends StatefulWidget {
 class _ItemsState extends State<Items> {
   List<Item> items = [];
   final CarouselController _controller = CarouselController();
-  int _current = 0; // Current index of the carousel
+  final int _current = 0; // Current index of the carousel
 
   @override
   void initState() {
@@ -47,6 +48,17 @@ class _ItemsState extends State<Items> {
       appBar: AppBar(
         title: const Text('Items'),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MyHomePage(),
+              ),
+            );
+          },
+        ),
       ),
       body: Container(
         padding: EdgeInsets.zero,
@@ -64,7 +76,7 @@ class _ItemsState extends State<Items> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ViewItemPage(
-                      item: items[index],
+                      itemId: items[index].id,
                     ),
                   ),
                 )
@@ -88,40 +100,18 @@ class _ItemsState extends State<Items> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
+                      SizedBox(
+                        height: 80,
                         child: items[index].imageUrls.isNotEmpty
-                            ? CarouselSlider(
-                                items: items.map((item) {
-                                  return Builder(
-                                    builder: (BuildContext context) {
-                                      return Image.network(
-                                        item.imageUrls[
-                                            0], // Assuming each item has at least one imageUrl
-                                        fit: BoxFit.cover,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                      );
-                                    },
-                                  );
-                                }).toList(),
-                                carouselController: _controller,
-                                options: CarouselOptions(
-                                    autoPlay: true,
-                                    enlargeCenterPage: true,
-                                    viewportFraction:
-                                        1.0, // Ensure only one image is shown at a time
-                                    aspectRatio: 2.0,
-                                    onPageChanged: (index, reason) {
-                                      setState(() {
-                                        _current =
-                                            index; // Update the current index of the carousel
-                                      });
-                                    }),
+                            ? Image.network(
+                                items[index].imageUrls[
+                                    0], // Assuming each item has at least one imageUrl
+                                fit: BoxFit.cover,
+                                width: MediaQuery.of(context).size.width,
                               )
-                            : const Center(
+                            : const SizedBox(
                                 child: Icon(Icons
-                                    .image_not_supported), // Show a "no image" icon when there are no images
-                              ),
+                                    .error)), // Empty SizedBox if there's no image URL
                       ),
                       Text(items[index].name),
                       //Text(items[index].description),
