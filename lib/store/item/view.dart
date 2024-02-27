@@ -2,7 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:store/store/item/edit.dart';
-import 'package:store/store/item/finance.dart';
+import 'package:store/new-item/finance/finance.dart';
 import 'package:store/store/item/image.dart';
 import 'package:store/store/item/items.dart';
 

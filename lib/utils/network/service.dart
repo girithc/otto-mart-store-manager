@@ -44,8 +44,7 @@ class NetworkService {
       body: json.encode(additionalData),
     );
 
-    print(
-        "Response body: ${response.body}  Status code: ${response.statusCode}");
+    //print("Response body: ${response.body}  Status code: ${response.statusCode}");
 
     return response;
   }

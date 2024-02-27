@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:provider/provider.dart';
+import 'package:store/new-item/newItem.dart';
 import 'package:store/shelf/shelf.dart';
 import 'package:store/store/item/items.dart';
 import 'package:store/store/stores.dart';
@@ -96,10 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurpleAccent,
+        backgroundColor: Colors.greenAccent,
         title: const Text(
           "Otto Store",
-          style: TextStyle(color: Colors.white, fontSize: 25),
+          style: TextStyle(color: Colors.black, fontSize: 25),
         ),
         leading: Container(), // Explicitly set leading to an empty Container
       ),
@@ -307,7 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const Stores()),
+                                builder: (context) => const NewItemPage()),
                           )
                         },
                         child: Center(
