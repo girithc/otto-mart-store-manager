@@ -13,7 +13,7 @@ class ShelfPage extends StatefulWidget {
 }
 
 class _ShelfPageState extends State<ShelfPage> {
-  final List<String> categories = ['A', 'B', 'C', 'D', 'E'];
+  //final List<String> categories = ['A', 'B', 'C', 'D', 'E'];
   List<Shelf> shelfList = [];
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
@@ -29,7 +29,7 @@ class _ShelfPageState extends State<ShelfPage> {
       String? storeId = await secureStorage.read(key: 'storeId');
       if (storeId == null) {
         print('storeId is null');
-        return;
+        storeId = "1";
       }
       int parsedStoreId = int.parse(storeId);
 
@@ -44,6 +44,7 @@ class _ShelfPageState extends State<ShelfPage> {
         headers: {"Content-Type": "application/json"},
       );
 
+      print("Response: ${response.body}");
       // Check if the request was successful
       if (response.statusCode == 200) {
         // Decode the response and update the shelfList
@@ -84,7 +85,6 @@ class _ShelfPageState extends State<ShelfPage> {
                   return _buildCategoryContainer(
                     context,
                     shelfList[index].id,
-                    shelfList[index].barcode,
                     "${shelfList[index].vertical} - ${shelfList[index].horizontal}",
                   );
                 },
@@ -99,7 +99,7 @@ class _ShelfPageState extends State<ShelfPage> {
   }
 
   Widget _buildCategoryContainer(
-      BuildContext context, int categoryID, String categoryName, String image) {
+      BuildContext context, int shelfId, String position) {
     return GestureDetector(
       onTap: () {},
       child: Container(
@@ -124,7 +124,7 @@ class _ShelfPageState extends State<ShelfPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                categoryName,
+                position,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     height: 1.1,
@@ -141,14 +141,12 @@ class _ShelfPageState extends State<ShelfPage> {
 class Shelf {
   final int id;
   final int storeId;
-  final String barcode;
   final String vertical;
   final int horizontal;
 
   Shelf({
     required this.id,
     required this.storeId,
-    required this.barcode,
     required this.vertical,
     required this.horizontal,
   });
@@ -158,7 +156,6 @@ class Shelf {
     return Shelf(
       id: json['id'],
       storeId: json['store_id'] as int,
-      barcode: json['barcode'] as String,
       vertical: json['vertical'] as String,
       horizontal: json['horizontal'] as int,
     );

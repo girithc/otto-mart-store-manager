@@ -1,6 +1,10 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:store/new-item/add-item/add-item.dart';
 import 'package:store/new-item/finance/finance.dart';
 import 'package:store/store/item/view.dart';
@@ -14,7 +18,7 @@ class FindItem extends StatefulWidget {
 }
 
 class _FindItemState extends State<FindItem> {
-  List<Item> _items = [];
+  List<ItemFind> _items = [];
 
   Future<void> searchItems(String value) async {
     Map<String, dynamic> data = {
@@ -29,7 +33,7 @@ class _FindItemState extends State<FindItem> {
     if (response.statusCode == 200 && response.body != "null") {
       List<dynamic> jsonResponse = json.decode(response.body);
       setState(() {
-        _items = jsonResponse.map((item) => Item.fromJson(item)).toList();
+        _items = jsonResponse.map((item) => ItemFind.fromJson(item)).toList();
       });
     } else {
       setState(() {
@@ -37,6 +41,88 @@ class _FindItemState extends State<FindItem> {
       });
       print("Response body is null or empty");
     }
+  }
+
+  Future<void> scanMobileBarcode(int itemId) async {
+    String barcodeScanRes;
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+
+      if (barcodeScanRes != '-1') {
+        updateBarcode(barcodeScanRes, itemId);
+      }
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version';
+      // TODO
+    }
+
+    if (!mounted) return;
+  }
+
+  Future<void> updateBarcode(String barcode, int itemId) async {
+    Map<String, dynamic> data = {
+      "barcode": barcode,
+      "item_id": itemId,
+    };
+
+    final networkService = NetworkService();
+    try {
+      final response = await networkService
+          .postWithAuth('/manager-update-item-barcode', additionalData: data);
+      if (response.statusCode == 200) {
+        // Assuming 'successImage' is a widget or a function returning a widget showing the success state
+        // ignore: use_build_context_synchronously
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Update Successful!'),
+                  Text(response.body),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        // Handle non-200 responses
+        _showErrorDialog();
+      }
+    } catch (e) {
+      // Handle exceptions from the request or JSON parsing
+      _showErrorDialog();
+    }
+  }
+
+  void _showErrorDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text('Failed to update the barcode. Please try again.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -63,20 +149,27 @@ class _FindItemState extends State<FindItem> {
               color: Colors.greenAccent,
             ),
             child: ListTile(
-              title: Align(
-                alignment: Alignment.centerLeft,
-                child: Chip(
-                  label: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.6,
-                    ),
-                    child: Text(
-                      item.name,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+              title: GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ViewItemPage(
+                      itemId: item.id,
                     ),
                   ),
-                  backgroundColor: Colors.white,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                    border: Border.all(color: Colors.black),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    item.name,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
               subtitle: Column(
@@ -132,20 +225,30 @@ class _FindItemState extends State<FindItem> {
                       const SizedBox(
                         height: 5,
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Text(
-                          "Scheme ",
-                          style: TextStyle(color: Colors.black, fontSize: 10),
+                      GestureDetector(
+                        onTap: () => scanMobileBarcode(item.id),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: item.barcode.isEmpty
+                                ? Colors.white
+                                : Colors.deepPurpleAccent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            "Barcode",
+                            style: TextStyle(
+                                color: item.barcode.isEmpty
+                                    ? Colors.black
+                                    : Colors.white,
+                                fontSize: 10),
+                          ),
                         ),
                       ),
                       const SizedBox(
                         height: 5,
                       ),
+                      /*
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
@@ -157,6 +260,7 @@ class _FindItemState extends State<FindItem> {
                           style: TextStyle(color: Colors.black, fontSize: 10),
                         ),
                       ),
+                      */
                     ],
                   )
                 ],
@@ -194,31 +298,32 @@ class _FindItemState extends State<FindItem> {
   }
 }
 
-class Item {
+class ItemFind {
   final int id;
   final String name;
   final String description;
   final int size;
   final String unitOfQuantity;
   final String brandName;
+  final String barcode;
   final int brandId;
   final double mrpPrice;
   final List<String> images;
 
-  Item({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.size,
-    required this.unitOfQuantity,
-    required this.brandName,
-    required this.brandId,
-    required this.mrpPrice,
-    required this.images,
-  });
+  ItemFind(
+      {required this.id,
+      required this.name,
+      required this.description,
+      required this.size,
+      required this.unitOfQuantity,
+      required this.brandName,
+      required this.brandId,
+      required this.mrpPrice,
+      required this.images,
+      required this.barcode});
 
-  factory Item.fromJson(Map<String, dynamic> json) {
-    return Item(
+  factory ItemFind.fromJson(Map<String, dynamic> json) {
+    return ItemFind(
       id: json['id'],
       name: json['name'],
       description: json['description'] ?? '',
@@ -228,6 +333,7 @@ class Item {
       brandId: json['brand_id'],
       mrpPrice: json['mrp_price']?.toDouble() ?? 0.0,
       images: List<String>.from(json['images'] ?? []),
+      barcode: json['barcode'] ?? '',
     );
   }
 }

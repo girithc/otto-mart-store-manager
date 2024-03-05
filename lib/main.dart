@@ -6,6 +6,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:provider/provider.dart';
 import 'package:store/new-item/find-item/find-item.dart';
 import 'package:store/shelf/shelf.dart';
+import 'package:store/shelf/shelfhome.dart';
 import 'package:store/store/item/items.dart';
 import 'package:store/store/stores.dart';
 import 'package:store/utils/login/page/phone_screen.dart';
@@ -102,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Colors.greenAccent,
         title: const Text(
-          "Otto Store",
+          "Store",
           style: TextStyle(color: Colors.black, fontSize: 25),
         ),
         leading: Container(), // Explicitly set leading to an empty Container
@@ -264,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const ShelfPage()),
+                                builder: (context) => const ShelfHome()),
                           );
                         },
                         child: Container(
