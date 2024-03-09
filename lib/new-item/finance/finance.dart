@@ -91,10 +91,22 @@ class _ItemFinanceState extends State<ItemFinance> {
         _nameController.text = _itemFinanceDetails!.itemName;
         _quantityController.text = _itemFinanceDetails!.quantity.toString();
         _unitofquantitycontroller.text = _itemFinanceDetails!.unitOfQuantity;
-        _mrppriceController.text = _itemFinanceDetails!.mrpPrice.toString();
-        _buypricecontroller.text = _itemFinanceDetails!.buyPrice.toString();
-        _marginController.text = _itemFinanceDetails!.margin.toString();
-        _gstcontroller.text = _itemFinanceDetails!.gst.toString();
+        _mrppriceController.text =
+            _itemFinanceDetails!.mrpPrice.toString() == 'null'
+                ? ''
+                : _itemFinanceDetails!.mrpPrice.toString();
+        _buypricecontroller.text =
+            _itemFinanceDetails!.buyPrice.toString() == 'null'
+                ? ''
+                : _itemFinanceDetails!.buyPrice.toString();
+        _marginController.text =
+            _itemFinanceDetails!.margin.toString() == 'null'
+                ? ''
+                : _itemFinanceDetails!.margin.toString();
+        _gstcontroller.text = _itemFinanceDetails!.gst.toString() == 'null'
+            ? ''
+            : _itemFinanceDetails!.gst.toString();
+
 // This assumes _selectedGst is meant to store the GST rate in its percentage form.
         _selectedGst = (_itemFinanceDetails!.gst! * 100).toInt();
         print("Selected GST fetch: $_selectedGst");
@@ -123,7 +135,6 @@ class _ItemFinanceState extends State<ItemFinance> {
       "mrp_price": double.parse(_mrppriceController.text),
       "buy_price": double.parse(_buypricecontroller.text),
       "margin": double.parse(_marginController.text),
-      // Divide _selectedGst by 100 to convert to decimal format
       "gst": _selectedGst! / 100,
     };
 
@@ -143,12 +154,30 @@ class _ItemFinanceState extends State<ItemFinance> {
     }
   }
 
+  /*
   // Function to calculate and update margin based on MRP and Buy Price
   void _updateMargin() {
     double mrp = double.tryParse(_mrppriceController.text) ?? 0;
     double buyPrice = double.tryParse(_buypricecontroller.text) ?? 0;
     if (mrp > 0 && buyPrice > 0 && buyPrice <= mrp) {
       double margin = ((mrp - buyPrice) / mrp) * 100;
+      _marginController.text = margin.toStringAsFixed(2);
+    }
+  }
+*/
+  void _updateMargin() {
+    double mrp = double.tryParse(_mrppriceController.text) ?? 0;
+    double buyPrice = double.tryParse(_buypricecontroller.text) ?? 0;
+    double gst = _selectedGst != null
+        ? _selectedGst! / 100
+        : 0; // Convert GST percentage to a decimal
+
+    // Adjust buyPrice to include GST
+    double buyPriceWithGst = buyPrice * (1 + (gst / 100));
+
+    if (mrp > 0 && buyPriceWithGst > 0 && buyPriceWithGst <= mrp) {
+      // Margin is calculated as ((MRP - Buy Price with GST) / MRP) * 100
+      double margin = ((mrp - buyPriceWithGst) / mrp) * 100;
       _marginController.text = margin.toStringAsFixed(2);
     }
   }
@@ -277,7 +306,7 @@ class _ItemFinanceState extends State<ItemFinance> {
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Buy Price",
+                          "Rate",
                           style: TextStyle(color: Colors.black, fontSize: 12),
                         ),
                       ),
@@ -352,12 +381,12 @@ class _ItemFinanceState extends State<ItemFinance> {
                                 );
                               }).toList(),
                               onChanged: (int? newValue) {
-                                print("Selected GSt $_selectedGst");
                                 setState(() {
                                   _selectedGst =
                                       newValue; // newValue will be the combined rate
                                 });
-                                print("Post Selected GSt $_selectedGst");
+
+                                _updateMargin();
                               },
                             )
                           : TextField(

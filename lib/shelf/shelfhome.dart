@@ -108,7 +108,7 @@ class _ShelfHomeState extends State<ShelfHome> {
                               border: OutlineInputBorder(),
                               fillColor: Colors.white,
                               filled: true),
-                          items: List.generate(100, (index) => index + 1)
+                          items: List.generate(130, (index) => index + 1)
                               .map<DropdownMenuItem<int>>((int value) {
                             return DropdownMenuItem<int>(
                               value: value,
