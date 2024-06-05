@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:store/main.dart';
 import 'package:store/new-item/add-item/add-item.dart';
 import 'package:store/new-item/finance/finance.dart';
 import 'package:store/store/item/view.dart';
@@ -129,14 +130,24 @@ class _FindItemState extends State<FindItem> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          decoration: const InputDecoration(
-            hintText: 'Search For Item',
-            hintStyle: TextStyle(color: Colors.black),
+          title: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Search For Item',
+              hintStyle: TextStyle(color: Colors.black),
+            ),
+            onChanged: (value) => searchItems(value),
           ),
-          onChanged: (value) => searchItems(value),
-        ),
-      ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MyHomePage(),
+                ),
+              );
+            },
+          )),
       body: ListView.builder(
         itemCount: _items.length,
         itemBuilder: (BuildContext context, int index) {
@@ -310,23 +321,32 @@ class ItemFind {
   final double mrpPrice;
   final List<String> images;
 
-  ItemFind(
-      {required this.id,
-      required this.name,
-      required this.description,
-      required this.size,
-      required this.unitOfQuantity,
-      required this.brandName,
-      required this.brandId,
-      required this.mrpPrice,
-      required this.images,
-      required this.barcode});
+  ItemFind({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.size,
+    required this.unitOfQuantity,
+    required this.brandName,
+    required this.brandId,
+    required this.mrpPrice,
+    required this.images,
+    required this.barcode,
+  });
 
   factory ItemFind.fromJson(Map<String, dynamic> json) {
+    // Handle description field which could be a map or string
+    String description = '';
+    if (json['description'] is Map) {
+      description = json['description']['String'] ?? '';
+    } else if (json['description'] is String) {
+      description = json['description'];
+    }
+
     return ItemFind(
       id: json['id'],
       name: json['name'],
-      description: json['description'] ?? '',
+      description: description,
       size: json['size'],
       unitOfQuantity: json['unit_of_quantity'],
       brandName: json['brand_name'],

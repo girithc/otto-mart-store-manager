@@ -169,13 +169,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const Items()),
+                                builder: (context) => const FindItem()),
                           )
                         },
                         child: Center(
                           child: Container(
                             margin: const EdgeInsets.only(
-                                left: 7.5, top: 15, bottom: 7.5, right: 15),
+                                left: 15, right: 7.5, top: 7.5, bottom: 7.5),
                             height: MediaQuery.of(context).size.height * 0.2,
                             width: MediaQuery.of(context).size.width * 0.85,
                             decoration: BoxDecoration(
@@ -195,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             child: const Center(
                               child: Text(
-                                'Items',
+                                'New Item',
                                 style: TextStyle(
                                     fontSize: 25,
                                     color: Colors.black,
@@ -308,12 +308,55 @@ class _MyHomePageState extends State<MyHomePage> {
                     Expanded(
                       flex: 1,
                       child: GestureDetector(
-                        onTap: () => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const FindItem()),
-                          )
+                        onTap: () {
+                          TextEditingController cartIdController =
+                              TextEditingController();
+                          // Show dialog to enter cartId
+                          showDialog<void>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Enter Cart ID'),
+                                content: TextField(
+                                  controller: cartIdController,
+                                  decoration: const InputDecoration(
+                                      hintText: 'Cart ID'),
+                                  keyboardType: TextInputType
+                                      .number, // Assuming cartId is numeric
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('Submit'),
+                                    onPressed: () async {
+                                      // Get cart ID from text field
+                                      String cartId = cartIdController.text;
+                                      if (cartId.isNotEmpty) {
+                                        // Dismiss the dialog first
+                                        Navigator.of(context).pop();
+                                        final networkService = NetworkService();
+                                        // Then send HTTP request with cartId
+                                        Map<String, dynamic> body = {
+                                          "cart_id": int.parse(cartId)
+                                        };
+
+                                        final response =
+                                            await networkService.postWithAuth(
+                                                '/manager-create-order',
+                                                additionalData: body);
+
+                                        print("Response ${response.body}");
+
+                                        if (response.statusCode == 200) {
+                                        } else {
+                                          // Handle error or show error message
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
                         },
                         child: Center(
                           child: Container(
@@ -322,23 +365,20 @@ class _MyHomePageState extends State<MyHomePage> {
                             height: MediaQuery.of(context).size.height * 0.2,
                             width: MediaQuery.of(context).size.width * 0.85,
                             decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(15), // Rounded borders
+                              borderRadius: BorderRadius.circular(15),
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey
-                                      .withOpacity(0.2), // Shadow color
+                                  color: Colors.grey.withOpacity(0.2),
                                   spreadRadius: 0,
-                                  blurRadius: 20, // Increased shadow blur
-                                  offset: const Offset(
-                                      0, 10), // Increased vertical offset
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
                                 ),
                               ],
                             ),
                             child: const Center(
                               child: Text(
-                                'New Item',
+                                'Create Order (Paid)',
                                 style: TextStyle(
                                     fontSize: 25,
                                     color: Colors.black,
@@ -465,6 +505,305 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: const Center(
                             child: Text(
                               'Item Store Combo',
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                        onTap: () async {
+                          // Show the dialog to ask for a phone number
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              final TextEditingController phoneController =
+                                  TextEditingController();
+                              return AlertDialog(
+                                title: const Text('Enter Phone Number'),
+                                content: TextField(
+                                  controller: phoneController,
+                                  decoration: InputDecoration(
+                                      hintText: "Enter 10-digit phone number"),
+                                  keyboardType: TextInputType.phone,
+                                  maxLength: 10,
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context)
+                                          .pop(); // Dismiss the phone number dialog
+                                      String phoneNumber = phoneController.text;
+
+                                      // Validate phone number length
+                                      if (phoneNumber.length != 10) {
+                                        // Show some error to the user
+                                        return;
+                                      }
+
+                                      try {
+                                        final networkService = NetworkService();
+                                        final response = await networkService
+                                            .postWithAuth('/manager-fcm-packer',
+                                                additionalData: {
+                                              'phone': phoneNumber,
+                                            });
+
+                                        print("Response: ${response.body}");
+                                        if (response.statusCode == 200) {
+                                          // Decode the response body
+                                          final result =
+                                              json.decode(response.body);
+
+                                          // Check if the result is true or false
+                                          if (result == true) {
+                                            // Show success dialog
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text('Success'),
+                                                  content: const Text(
+                                                      'Operation was successful.'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop(); // Dismiss success dialog
+                                                      },
+                                                      child: const Text('OK'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          } else {
+                                            // Show failure dialog
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text('Failure'),
+                                                  content: const Text(
+                                                      'Operation failed.'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop(); // Dismiss failure dialog
+                                                      },
+                                                      child: const Text('OK'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          }
+                                        } else {
+                                          // Handle server errors or invalid responses
+                                          throw Exception(
+                                              'Failed to send notification');
+                                        }
+                                      } catch (e) {
+                                        // Handle exceptions by showing an error dialog or logging
+                                      }
+                                    },
+                                    child: const Text('Send'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Dismiss the dialog without doing anything
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(
+                              left: 7.5, top: 7.5, bottom: 7.5, right: 15),
+                          height: MediaQuery.of(context).size.height * 0.2,
+                          width: MediaQuery.of(context).size.width * 0.85,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(15), // Rounded borders
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey
+                                    .withOpacity(0.2), // Shadow color
+                                spreadRadius: 0,
+                                blurRadius: 20, // Increased shadow blur
+                                offset: const Offset(
+                                    0, 10), // Increased vertical offset
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Send Notification (Packer)',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                        onTap: () async {
+                          // Show the dialog to ask for a phone number
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              final TextEditingController phoneController =
+                                  TextEditingController();
+                              return AlertDialog(
+                                title: const Text('Enter Phone Number'),
+                                content: TextField(
+                                  controller: phoneController,
+                                  decoration: InputDecoration(
+                                      hintText: "Enter 10-digit phone number"),
+                                  keyboardType: TextInputType.phone,
+                                  maxLength: 10,
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context)
+                                          .pop(); // Dismiss the phone number dialog
+                                      String phoneNumber = phoneController.text;
+
+                                      // Validate phone number length
+                                      if (phoneNumber.length != 10) {
+                                        // Show some error to the user
+                                        return;
+                                      }
+
+                                      try {
+                                        final networkService = NetworkService();
+                                        final response = await networkService
+                                            .postWithAuth('/manager-fcm',
+                                                additionalData: {
+                                              'phone': phoneNumber,
+                                            });
+
+                                        print("Response: ${response.body}");
+                                        if (response.statusCode == 200) {
+                                          // Decode the response body
+                                          final result =
+                                              json.decode(response.body);
+
+                                          // Check if the result is true or false
+                                          if (result == true) {
+                                            // Show success dialog
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text('Success'),
+                                                  content: const Text(
+                                                      'Operation was successful.'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop(); // Dismiss success dialog
+                                                      },
+                                                      child: const Text('OK'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          } else {
+                                            // Show failure dialog
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text('Failure'),
+                                                  content: const Text(
+                                                      'Operation failed.'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop(); // Dismiss failure dialog
+                                                      },
+                                                      child: const Text('OK'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          }
+                                        } else {
+                                          // Handle server errors or invalid responses
+                                          throw Exception(
+                                              'Failed to send notification');
+                                        }
+                                      } catch (e) {
+                                        // Handle exceptions by showing an error dialog or logging
+                                      }
+                                    },
+                                    child: const Text('Send'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Dismiss the dialog without doing anything
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(
+                              left: 7.5, top: 7.5, bottom: 7.5, right: 15),
+                          height: MediaQuery.of(context).size.height * 0.2,
+                          width: MediaQuery.of(context).size.width * 0.85,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(15), // Rounded borders
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey
+                                    .withOpacity(0.2), // Shadow color
+                                spreadRadius: 0,
+                                blurRadius: 20, // Increased shadow blur
+                                offset: const Offset(
+                                    0, 10), // Increased vertical offset
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Send Notification (Customer)',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontSize: 25,
                                   color: Colors.black,
