@@ -150,6 +150,7 @@ class _MyVerifyState extends State<MyVerify> {
       final response = await networkService.postWithAuth('/verify-otp-manager',
           additionalData: requestData);
 
+      print("Response: ${response.body} ${response.body}");
       if (response.statusCode == 200) {
         print(response.statusCode);
         print(response.body);
