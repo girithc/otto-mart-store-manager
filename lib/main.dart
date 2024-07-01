@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:provider/provider.dart';
+import 'package:store/inventory/inventory.dart';
 import 'package:store/new-item/find-item/find-item.dart';
 import 'package:store/shelf/shelf.dart';
 import 'package:store/shelf/shelfhome.dart';
@@ -100,364 +101,322 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.greenAccent,
-        title: const Text(
-          "Store",
-          style: TextStyle(color: Colors.black, fontSize: 25),
+        appBar: AppBar(
+          shadowColor: Colors.white,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
         ),
-        leading: Container(), // Explicitly set leading to an empty Container
-      ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SingleChildScrollView(
-          child: Material(
-            color: Colors.white,
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const VendorHomeScreen()),
-                          )
-                        },
-                        child: Center(
-                          child: Container(
-                            margin: const EdgeInsets.only(
-                                left: 15, right: 7.5, top: 15, bottom: 7.5),
-                            height: MediaQuery.of(context).size.height * 0.2,
-                            width: MediaQuery.of(context).size.width * 0.85,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(15), // Rounded borders
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey
-                                      .withOpacity(0.2), // Shadow color
-                                  spreadRadius: 0,
-                                  blurRadius: 20, // Increased shadow blur
-                                  offset: const Offset(
-                                      0, 10), // Increased vertical offset
-                                ),
-                              ],
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            child: Material(
+              color: Colors.white,
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: () => {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const VendorHomeScreen()),
+                      )
+                    },
+                    child: Center(
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                            left: 15, right: 7.5, top: 15, bottom: 7.5),
+                        height: MediaQuery.of(context).size.height * 0.1,
+                        width: MediaQuery.of(context).size.width * 0.85,
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(15), // Rounded borders
+                          color: Colors.grey.shade100,
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Colors.grey.withOpacity(0.2), // Shadow color
+                              spreadRadius: 0,
+                              blurRadius: 20, // Increased shadow blur
+                              offset: const Offset(
+                                  0, 10), // Increased vertical offset
                             ),
-                            child: const Center(
-                              child: Text(
-                                'Vendor',
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Vendor',
+                            style: TextStyle(
+                                fontSize: 25,
+                                color: Colors.black,
+                                fontWeight: FontWeight.normal),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const FindItem()),
-                          )
-                        },
-                        child: Center(
-                          child: Container(
-                            margin: const EdgeInsets.only(
-                                left: 15, right: 7.5, top: 7.5, bottom: 7.5),
-                            height: MediaQuery.of(context).size.height * 0.2,
-                            width: MediaQuery.of(context).size.width * 0.85,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(15), // Rounded borders
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey
-                                      .withOpacity(0.2), // Shadow color
-                                  spreadRadius: 0,
-                                  blurRadius: 20, // Increased shadow blur
-                                  offset: const Offset(
-                                      0, 10), // Increased vertical offset
-                                ),
-                              ],
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'New Item',
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
+                  ),
+                  /*
+                GestureDetector(
+                  onTap: () => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const FindItem()),
+                    )
+                  },
+                  child: Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                          left: 15, right: 7.5, top: 7.5, bottom: 7.5),
+                      height: MediaQuery.of(context).size.height * 0.1,
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(15), // Rounded borders
+                        color: Colors.grey.shade100,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2), // Shadow color
+                            spreadRadius: 0,
+                            blurRadius: 20, // Increased shadow blur
+                            offset: const Offset(
+                                0, 10), // Increased vertical offset
                           ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'New Item',
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal),
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Stores()),
-                          )
-                        },
-                        child: Center(
-                          child: Container(
-                            margin: const EdgeInsets.only(
-                                left: 15, right: 7.5, top: 7.5, bottom: 7.5),
-                            height: MediaQuery.of(context).size.height * 0.2,
-                            width: MediaQuery.of(context).size.width * 0.85,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(15), // Rounded borders
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey
-                                      .withOpacity(0.2), // Shadow color
-                                  spreadRadius: 0,
-                                  blurRadius: 20, // Increased shadow blur
-                                  offset: const Offset(
-                                      0, 10), // Increased vertical offset
-                                ),
-                              ],
+                */
+                  GestureDetector(
+                    onTap: () => {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Stores()),
+                      )
+                    },
+                    child: Center(
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                            left: 15, right: 7.5, top: 7.5, bottom: 7.5),
+                        height: MediaQuery.of(context).size.height * 0.1,
+                        width: MediaQuery.of(context).size.width * 0.85,
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(15), // Rounded borders
+                          color: Colors.grey.shade100,
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Colors.grey.withOpacity(0.2), // Shadow color
+                              spreadRadius: 0,
+                              blurRadius: 20, // Increased shadow blur
+                              offset: const Offset(
+                                  0, 10), // Increased vertical offset
                             ),
-                            child: const Center(
-                              child: Text(
-                                'Stores',
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Stores',
+                            style: TextStyle(
+                                fontSize: 25,
+                                color: Colors.black,
+                                fontWeight: FontWeight.normal),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      width: 10,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ShelfHome()),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                          left: 7.5, top: 7.5, bottom: 7.5, right: 15),
+                      height: MediaQuery.of(context).size.height * 0.1,
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(15), // Rounded borders
+                        color: Colors.grey.shade100,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2), // Shadow color
+                            spreadRadius: 0,
+                            blurRadius: 20, // Increased shadow blur
+                            offset: const Offset(
+                                0, 10), // Increased vertical offset
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Shelves',
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal),
+                        ),
+                      ),
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const ShelfHome()),
-                          );
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(
-                              left: 7.5, top: 7.5, bottom: 7.5, right: 15),
-                          height: MediaQuery.of(context).size.height * 0.2,
-                          width: MediaQuery.of(context).size.width * 0.85,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(15), // Rounded borders
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey
-                                    .withOpacity(0.2), // Shadow color
-                                spreadRadius: 0,
-                                blurRadius: 20, // Increased shadow blur
-                                offset: const Offset(
-                                    0, 10), // Increased vertical offset
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      TextEditingController cartIdController =
+                          TextEditingController();
+                      // Show dialog to enter cartId
+                      showDialog<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Enter Cart ID'),
+                            content: TextField(
+                              controller: cartIdController,
+                              decoration:
+                                  const InputDecoration(hintText: 'Cart ID'),
+                              keyboardType: TextInputType
+                                  .number, // Assuming cartId is numeric
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                child: const Text('Submit'),
+                                onPressed: () async {
+                                  // Get cart ID from text field
+                                  String cartId = cartIdController.text;
+                                  if (cartId.isNotEmpty) {
+                                    // Dismiss the dialog first
+                                    Navigator.of(context).pop();
+                                    final networkService = NetworkService();
+                                    // Then send HTTP request with cartId
+                                    Map<String, dynamic> body = {
+                                      "cart_id": int.parse(cartId)
+                                    };
+
+                                    final response = await networkService
+                                        .postWithAuth('/manager-create-order',
+                                            additionalData: body);
+
+                                    print("Response ${response.body}");
+
+                                    if (response.statusCode == 200) {
+                                    } else {
+                                      // Handle error or show error message
+                                    }
+                                  }
+                                },
                               ),
                             ],
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Shelves',
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.normal),
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () {
-                          TextEditingController cartIdController =
-                              TextEditingController();
-                          // Show dialog to enter cartId
-                          showDialog<void>(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Enter Cart ID'),
-                                content: TextField(
-                                  controller: cartIdController,
-                                  decoration: const InputDecoration(
-                                      hintText: 'Cart ID'),
-                                  keyboardType: TextInputType
-                                      .number, // Assuming cartId is numeric
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: const Text('Submit'),
-                                    onPressed: () async {
-                                      // Get cart ID from text field
-                                      String cartId = cartIdController.text;
-                                      if (cartId.isNotEmpty) {
-                                        // Dismiss the dialog first
-                                        Navigator.of(context).pop();
-                                        final networkService = NetworkService();
-                                        // Then send HTTP request with cartId
-                                        Map<String, dynamic> body = {
-                                          "cart_id": int.parse(cartId)
-                                        };
-
-                                        final response =
-                                            await networkService.postWithAuth(
-                                                '/manager-create-order',
-                                                additionalData: body);
-
-                                        print("Response ${response.body}");
-
-                                        if (response.statusCode == 200) {
-                                        } else {
-                                          // Handle error or show error message
-                                        }
-                                      }
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
                           );
                         },
-                        child: Center(
-                          child: Container(
-                            margin: const EdgeInsets.only(
-                                left: 15, right: 7.5, top: 7.5, bottom: 7.5),
-                            height: MediaQuery.of(context).size.height * 0.2,
-                            width: MediaQuery.of(context).size.width * 0.85,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  spreadRadius: 0,
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
+                      );
+                    },
+                    child: Center(
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                            left: 15, right: 7.5, top: 7.5, bottom: 7.5),
+                        height: MediaQuery.of(context).size.height * 0.1,
+                        width: MediaQuery.of(context).size.width * 0.85,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.grey.shade100,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
-                            child: const Center(
-                              child: Text(
-                                'Create Order (Paid)',
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Create Order (Paid)',
+                            style: TextStyle(
+                                fontSize: 25,
+                                color: Colors.black,
+                                fontWeight: FontWeight.normal),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () async {
-                          try {
-                            final networkService = NetworkService();
-                            final response = await networkService.postWithAuth(
-                                '/manager-item-store-combo',
-                                additionalData: {});
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      try {
+                        final networkService = NetworkService();
+                        final response = await networkService.postWithAuth(
+                            '/manager-item-store-combo',
+                            additionalData: {});
 
-                            print("Response: ${response.body}");
-                            if (response.statusCode == 200) {
-                              // Decode the response body
+                        print("Response: ${response.body}");
+                        if (response.statusCode == 200) {
+                          // Decode the response body
 
-                              final result = json.decode(response.body);
+                          final result = json.decode(response.body);
 
-                              // Check if the result is true or false
-                              if (result == true) {
-                                // Show success dialog
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Success'),
-                                      content: const Text(
-                                          'Operation was successful.'),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(); // Dismiss dialog
-                                          },
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    );
-                                  },
+                          // Check if the result is true or false
+                          if (result == true) {
+                            // Show success dialog
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Success'),
+                                  content:
+                                      const Text('Operation was successful.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context)
+                                            .pop(); // Dismiss dialog
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
                                 );
-                              } else {
-                                // Show failure dialog
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Failure'),
-                                      content: const Text('Operation failed.'),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(); // Dismiss dialog
-                                          },
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    );
-                                  },
+                              },
+                            );
+                          } else {
+                            // Show failure dialog
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Failure'),
+                                  content: const Text('Operation failed.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context)
+                                            .pop(); // Dismiss dialog
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
                                 );
-                              }
-                            } else {
-                              // If the server did not return a 200 OK response,
-                              // then throw an exception.
-                              throw Exception('Failed to load data');
-                            }
-                          } catch (e) {
-                            /*
+                              },
+                            );
+                          }
+                        } else {
+                          // If the server did not return a 200 OK response,
+                          // then throw an exception.
+                          throw Exception('Failed to load data');
+                        }
+                      } catch (e) {
+                        /*
                             // Handle exception by showing a dialog, snackbar, etc.
                             print(e); // For debugging purposes
                             showDialog(
@@ -480,343 +439,322 @@ class _MyHomePageState extends State<MyHomePage> {
                             );
                           }
                           */
-                          }
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(
-                              left: 7.5, top: 7.5, bottom: 7.5, right: 15),
-                          height: MediaQuery.of(context).size.height * 0.2,
-                          width: MediaQuery.of(context).size.width * 0.85,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(15), // Rounded borders
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey
-                                    .withOpacity(0.2), // Shadow color
-                                spreadRadius: 0,
-                                blurRadius: 20, // Increased shadow blur
-                                offset: const Offset(
-                                    0, 10), // Increased vertical offset
-                              ),
-                            ],
+                      }
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                          left: 7.5, top: 7.5, bottom: 7.5, right: 15),
+                      height: MediaQuery.of(context).size.height * 0.1,
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(15), // Rounded borders
+                        color: Colors.grey.shade100,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2), // Shadow color
+                            spreadRadius: 0,
+                            blurRadius: 20, // Increased shadow blur
+                            offset: const Offset(
+                                0, 10), // Increased vertical offset
                           ),
-                          child: const Center(
-                            child: Text(
-                              'Item Store Combo',
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.normal),
-                            ),
-                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Item Store Combo',
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal),
                         ),
                       ),
                     ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () async {
-                          // Show the dialog to ask for a phone number
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              final TextEditingController phoneController =
-                                  TextEditingController();
-                              return AlertDialog(
-                                title: const Text('Enter Phone Number'),
-                                content: TextField(
-                                  controller: phoneController,
-                                  decoration: InputDecoration(
-                                      hintText: "Enter 10-digit phone number"),
-                                  keyboardType: TextInputType.phone,
-                                  maxLength: 10,
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () async {
-                                      Navigator.of(context)
-                                          .pop(); // Dismiss the phone number dialog
-                                      String phoneNumber = phoneController.text;
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      // Show the dialog to ask for a phone number
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          final TextEditingController phoneController =
+                              TextEditingController();
+                          return AlertDialog(
+                            title: const Text('Enter Phone Number'),
+                            content: TextField(
+                              controller: phoneController,
+                              decoration: InputDecoration(
+                                  hintText: "Enter 10-digit phone number"),
+                              keyboardType: TextInputType.phone,
+                              maxLength: 10,
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.of(context)
+                                      .pop(); // Dismiss the phone number dialog
+                                  String phoneNumber = phoneController.text;
 
-                                      // Validate phone number length
-                                      if (phoneNumber.length != 10) {
-                                        // Show some error to the user
-                                        return;
-                                      }
+                                  // Validate phone number length
+                                  if (phoneNumber.length != 10) {
+                                    // Show some error to the user
+                                    return;
+                                  }
 
-                                      try {
-                                        final networkService = NetworkService();
-                                        final response = await networkService
-                                            .postWithAuth('/manager-fcm-packer',
-                                                additionalData: {
-                                              'phone': phoneNumber,
-                                            });
+                                  try {
+                                    final networkService = NetworkService();
+                                    final response = await networkService
+                                        .postWithAuth('/manager-fcm-packer',
+                                            additionalData: {
+                                          'phone': phoneNumber,
+                                        });
 
-                                        print("Response: ${response.body}");
-                                        if (response.statusCode == 200) {
-                                          // Decode the response body
-                                          final result =
-                                              json.decode(response.body);
+                                    print("Response: ${response.body}");
+                                    if (response.statusCode == 200) {
+                                      // Decode the response body
+                                      final result = json.decode(response.body);
 
-                                          // Check if the result is true or false
-                                          if (result == true) {
-                                            // Show success dialog
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: const Text('Success'),
-                                                  content: const Text(
-                                                      'Operation was successful.'),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop(); // Dismiss success dialog
-                                                      },
-                                                      child: const Text('OK'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
+                                      // Check if the result is true or false
+                                      if (result == true) {
+                                        // Show success dialog
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Success'),
+                                              content: const Text(
+                                                  'Operation was successful.'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(); // Dismiss success dialog
+                                                  },
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
                                             );
-                                          } else {
-                                            // Show failure dialog
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: const Text('Failure'),
-                                                  content: const Text(
-                                                      'Operation failed.'),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop(); // Dismiss failure dialog
-                                                      },
-                                                      child: const Text('OK'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
+                                          },
+                                        );
+                                      } else {
+                                        // Show failure dialog
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Failure'),
+                                              content: const Text(
+                                                  'Operation failed.'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(); // Dismiss failure dialog
+                                                  },
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
                                             );
-                                          }
-                                        } else {
-                                          // Handle server errors or invalid responses
-                                          throw Exception(
-                                              'Failed to send notification');
-                                        }
-                                      } catch (e) {
-                                        // Handle exceptions by showing an error dialog or logging
+                                          },
+                                        );
                                       }
-                                    },
-                                    child: const Text('Send'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(); // Dismiss the dialog without doing anything
-                                    },
-                                    child: const Text('Cancel'),
-                                  ),
-                                ],
-                              );
-                            },
+                                    } else {
+                                      // Handle server errors or invalid responses
+                                      throw Exception(
+                                          'Failed to send notification');
+                                    }
+                                  } catch (e) {
+                                    // Handle exceptions by showing an error dialog or logging
+                                  }
+                                },
+                                child: const Text('Send'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(); // Dismiss the dialog without doing anything
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                            ],
                           );
                         },
-                        child: Container(
-                          margin: const EdgeInsets.only(
-                              left: 7.5, top: 7.5, bottom: 7.5, right: 15),
-                          height: MediaQuery.of(context).size.height * 0.2,
-                          width: MediaQuery.of(context).size.width * 0.85,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(15), // Rounded borders
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey
-                                    .withOpacity(0.2), // Shadow color
-                                spreadRadius: 0,
-                                blurRadius: 20, // Increased shadow blur
-                                offset: const Offset(
-                                    0, 10), // Increased vertical offset
-                              ),
-                            ],
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                          left: 7.5, top: 7.5, bottom: 7.5, right: 15),
+                      height: MediaQuery.of(context).size.height * 0.1,
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(15), // Rounded borders
+                        color: Colors.grey.shade100,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2), // Shadow color
+                            spreadRadius: 0,
+                            blurRadius: 20, // Increased shadow blur
+                            offset: const Offset(
+                                0, 10), // Increased vertical offset
                           ),
-                          child: const Center(
-                            child: Text(
-                              'Send Notification (Packer)',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.normal),
-                            ),
-                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Send Notification (Packer)',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal),
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () async {
-                          // Show the dialog to ask for a phone number
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              final TextEditingController phoneController =
-                                  TextEditingController();
-                              return AlertDialog(
-                                title: const Text('Enter Phone Number'),
-                                content: TextField(
-                                  controller: phoneController,
-                                  decoration: InputDecoration(
-                                      hintText: "Enter 10-digit phone number"),
-                                  keyboardType: TextInputType.phone,
-                                  maxLength: 10,
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () async {
-                                      Navigator.of(context)
-                                          .pop(); // Dismiss the phone number dialog
-                                      String phoneNumber = phoneController.text;
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      // Show the dialog to ask for a phone number
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          final TextEditingController phoneController =
+                              TextEditingController();
+                          return AlertDialog(
+                            title: const Text('Enter Phone Number'),
+                            content: TextField(
+                              controller: phoneController,
+                              decoration: InputDecoration(
+                                  hintText: "Enter 10-digit phone number"),
+                              keyboardType: TextInputType.phone,
+                              maxLength: 10,
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.of(context)
+                                      .pop(); // Dismiss the phone number dialog
+                                  String phoneNumber = phoneController.text;
 
-                                      // Validate phone number length
-                                      if (phoneNumber.length != 10) {
-                                        // Show some error to the user
-                                        return;
-                                      }
+                                  // Validate phone number length
+                                  if (phoneNumber.length != 10) {
+                                    // Show some error to the user
+                                    return;
+                                  }
 
-                                      try {
-                                        final networkService = NetworkService();
-                                        final response = await networkService
-                                            .postWithAuth('/manager-fcm',
-                                                additionalData: {
-                                              'phone': phoneNumber,
-                                            });
+                                  try {
+                                    final networkService = NetworkService();
+                                    final response = await networkService
+                                        .postWithAuth('/manager-fcm',
+                                            additionalData: {
+                                          'phone': phoneNumber,
+                                        });
 
-                                        print("Response: ${response.body}");
-                                        if (response.statusCode == 200) {
-                                          // Decode the response body
-                                          final result =
-                                              json.decode(response.body);
+                                    print("Response: ${response.body}");
+                                    if (response.statusCode == 200) {
+                                      // Decode the response body
+                                      final result = json.decode(response.body);
 
-                                          // Check if the result is true or false
-                                          if (result == true) {
-                                            // Show success dialog
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: const Text('Success'),
-                                                  content: const Text(
-                                                      'Operation was successful.'),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop(); // Dismiss success dialog
-                                                      },
-                                                      child: const Text('OK'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
+                                      // Check if the result is true or false
+                                      if (result == true) {
+                                        // Show success dialog
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Success'),
+                                              content: const Text(
+                                                  'Operation was successful.'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(); // Dismiss success dialog
+                                                  },
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
                                             );
-                                          } else {
-                                            // Show failure dialog
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: const Text('Failure'),
-                                                  content: const Text(
-                                                      'Operation failed.'),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop(); // Dismiss failure dialog
-                                                      },
-                                                      child: const Text('OK'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
+                                          },
+                                        );
+                                      } else {
+                                        // Show failure dialog
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Failure'),
+                                              content: const Text(
+                                                  'Operation failed.'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(); // Dismiss failure dialog
+                                                  },
+                                                  child: const Text('OK'),
+                                                ),
+                                              ],
                                             );
-                                          }
-                                        } else {
-                                          // Handle server errors or invalid responses
-                                          throw Exception(
-                                              'Failed to send notification');
-                                        }
-                                      } catch (e) {
-                                        // Handle exceptions by showing an error dialog or logging
+                                          },
+                                        );
                                       }
-                                    },
-                                    child: const Text('Send'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(); // Dismiss the dialog without doing anything
-                                    },
-                                    child: const Text('Cancel'),
-                                  ),
-                                ],
-                              );
-                            },
+                                    } else {
+                                      // Handle server errors or invalid responses
+                                      throw Exception(
+                                          'Failed to send notification');
+                                    }
+                                  } catch (e) {
+                                    // Handle exceptions by showing an error dialog or logging
+                                  }
+                                },
+                                child: const Text('Send'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(); // Dismiss the dialog without doing anything
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                            ],
                           );
                         },
-                        child: Container(
-                          margin: const EdgeInsets.only(
-                              left: 7.5, top: 7.5, bottom: 7.5, right: 15),
-                          height: MediaQuery.of(context).size.height * 0.2,
-                          width: MediaQuery.of(context).size.width * 0.85,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(15), // Rounded borders
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey
-                                    .withOpacity(0.2), // Shadow color
-                                spreadRadius: 0,
-                                blurRadius: 20, // Increased shadow blur
-                                offset: const Offset(
-                                    0, 10), // Increased vertical offset
-                              ),
-                            ],
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                          left: 7.5, top: 7.5, bottom: 7.5, right: 15),
+                      height: MediaQuery.of(context).size.height * 0.1,
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(15), // Rounded borders
+                        color: Colors.grey.shade100,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2), // Shadow color
+                            spreadRadius: 0,
+                            blurRadius: 20, // Increased shadow blur
+                            offset: const Offset(
+                                0, 10), // Increased vertical offset
                           ),
-                          child: const Center(
-                            child: Text(
-                              'Send Notification (Customer)',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.normal),
-                            ),
-                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Send Notification (Customer)',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal),
                         ),
                       ),
                     ),
-                  ],
-                )
+                  ),
 
-                /*
+                  /*
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -830,7 +768,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: MediaQuery.of(context).size.width * 0.85,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15), // Rounded borders
-                      color: Colors.white,
+                      color: Colors.grey.shade100,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.25), // Shadow color
@@ -860,7 +798,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: MediaQuery.of(context).size.width * 0.85,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15), // Rounded borders
-                      color: Colors.white,
+                      color: Colors.grey.shade100,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.25), // Shadow color
@@ -901,7 +839,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: MediaQuery.of(context).size.width * 0.85,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15), // Rounded borders
-                      color: Colors.white,
+                      color: Colors.grey.shade100,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.25), // Shadow color
@@ -936,8 +874,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     child: Card(
                       elevation: 10,
-                      color: Colors.white,
-                      surfaceTintColor: Colors.white,
+                      color: Colors.grey.shade100,
+                      surfaceTintColor: Colors.grey.shade100,
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
                           color: Theme.of(context).colorScheme.primary,
@@ -978,7 +916,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                                 child: const Text('Start Checklist',
                                     style: TextStyle(
-                                        color: Colors.white, fontSize: 20)),
+                                        color: Colors.grey.shade100, fontSize: 20)),
                               ),
                             ),
                           ],
@@ -989,15 +927,35 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 const SizedBox(height: 10),
                 */
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.picture_in_picture_alt_outlined),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        bottomNavigationBar: BottomAppBar(
+          child: GestureDetector(
+            onTap: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MyInventory()),
+              )
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.deepPurpleAccent,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Center(
+                  child: Text(
+                "Get Inventory",
+                style: TextStyle(
+                    color: Colors.grey.shade100,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              )),
+            ),
+          ),
+        ) // This trailing comma makes auto-formatting nicer for build methods.
+        );
   }
 }
